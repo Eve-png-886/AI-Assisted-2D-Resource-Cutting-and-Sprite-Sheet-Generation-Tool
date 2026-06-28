@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>精灵图生成 - AI游戏资源切割工具</title>
+    <style>
+        :root {
+            --bg-primary: #1a1a2e;
+            --bg-secondary: #16213e;
+            --bg-tertiary: #0f0f23;
+            --text-primary: #e8e8e8;
+            --text-muted: #a0a0b0;
+            --accent-blue: #4a9eff;
+            --accent-green: #2ecc71;
+            --accent-purple: #9b59b6;
+            --border-color: #2a2a4a;
+            --card-bg: #1e1e3a;
+            --btn-hover: #2a2a5a;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .header {
+            background: var(--bg-secondary);
+            padding: 12px 24px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .logo {
+            font-size: 20px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo-icon {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+
+        .nav-menu {
+            display: flex;
+            gap: 8px;
+        }
+
+        .nav-item {
+            padding: 8px 16px;
+            border-radius: 6px;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+
+        .nav-item:hover {
+            background: var(--btn-hover);
+            color: var(--text-primary);
+        }
+
+        .nav-item.active {
+            background: var(--accent-blue);
+            color: white;
+        }
+
+        .content {
+            flex: 1;
+            display: flex;
+            overflow: hidden;
+        }
+
+        .sidebar {
+            width: 360px;
+            background: var(--bg-secondary);
+            border-right: 1px solid var(--border-color);
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .main-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .panel {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .panel-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 12px 16px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent-blue), #6b7fff);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(74, 158, 255, 0.4);
+        }
+
+        .btn-green {
+            background: linear-gradient(135deg, var(--accent-green), #27ae60);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-secondary:hover {
+            background: var(--btn-hover);
+        }
+
+        .input-group {
+            margin-bottom: 14px;
+        }
+
+        .input-label {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+            display: block;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            -webkit-appearance: none;
+            height: 6px;
+            border-radius: 3px;
+            background: var(--bg-tertiary);
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: var(--accent-blue);
+            cursor: pointer;
+        }
+
+        input[type="number"], select {
+            width: 100%;
+            padding: 10px 12px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            color: var(--text-primary);
+            font-size: 14px;
+        }
+
+        .preview-area {
+            flex: 1;
+            padding: 20px;
+            overflow: auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: var(--bg-tertiary);
+        }
+
+        .spritesheet-preview {
+            max-width: 100%;
+            max-height: 60%;
+            border-radius: 8px;
+            background: linear-gradient(45deg, #2a2a4a 25%, transparent 25%, transparent 75%, #2a2a4a 75%, #2a2a4a), 
+                        linear-gradient(45deg, #2a2a4a 25%, transparent 25%, transparent 75%, #2a2a4a 75%, #2a2a4a);
+            background-size: 20px 20px;
+            background-position: 0 0, 10px 10px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        }
+
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            margin-top: 20px;
+            width: 100%;
+            max-width: 800px;
+        }
+
+        .stat-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 16px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: 600;
+            color: var(--accent-blue);
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        .config-panel {
+            margin-top: 20px;
+            width: 100%;
+            max-width: 800px;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .config-header {
+            padding: 12px 16px;
+            background: var(--bg-tertiary);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .config-title {
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .config-content {
+            padding: 16px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .config-content pre {
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 12px;
+            color: var(--text-primary);
+            white-space: pre-wrap;
+            word-break: break-all;
+            margin: 0;
+        }
+
+        .algorithm-cards {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+
+        .algorithm-card {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .algorithm-card:hover {
+            border-color: var(--accent-blue);
+            background: var(--btn-hover);
+        }
+
+        .algorithm-card.selected {
+            border-color: var(--accent-green);
+            background: rgba(46, 204, 113, 0.1);
+        }
+
+        .algorithm-name {
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .algorithm-desc {
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        .upload-area {
+            border: 2px dashed var(--border-color);
+            border-radius: 10px;
+            padding: 30px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: var(--card-bg);
+            margin-bottom: 20px;
+        }
+
+        .upload-area:hover, .upload-area.drag-over {
+            border-color: var(--accent-blue);
+            background: var(--btn-hover);
+        }
+
+        .upload-icon {
+            font-size: 36px;
+            margin-bottom: 10px;
+        }
+
+        .placeholder {
+            text-align: center;
+            color: var(--text-muted);
+            padding: 60px;
+        }
+
+        .placeholder-icon {
+            font-size: 64px;
+            margin-bottom: 16px;
+        }
+
+        .status-bar {
+            background: var(--bg-secondary);
+            border-top: 1px solid var(--border-color);
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 13px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--accent-green);
+            display: inline-block;
+            margin-right: 8px;
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="logo">
+            <div class="logo-icon">🎮</div>
+            <span>AI游戏资源切割工具</span>
+        </div>
+        <nav class="nav-menu">
+            <a href="/" class="nav-item">🏠 工作台</a>
+            <a href="/ai-slicing" class="nav-item">🤖 AI切割</a>
+            <a href="/spritesheet" class="nav-item active">📦 精灵图</a>
+            <a href="/nine-patch" class="nav-item">📐 九宫格</a>
+            <a href="/animation" class="nav-item">🎬 动画生成</a>
+            <a href="/export" class="nav-item">📤 导出</a>
+        </nav>
+    </header>
+
+    <div class="content">
+        <aside class="sidebar">
+            <div class="panel">
+                <div class="panel-title">📁 上传图片</div>
+                <div class="upload-area" id="uploadArea" onclick="document.getElementById('fileInput').click()">
+                    <input type="file" id="fileInput" accept="image/*" style="display: none;" onchange="handleFileSelect(event)">
+                    <div class="upload-icon">📤</div>
+                    <div style="font-size: 14px;">点击或拖拽上传</div>
+                    <div style="font-size: 12px; color: var(--text-muted); margin-top: 6px;">PNG, JPG, WebP</div>
+                </div>
+            </div>
+
+            <div class="panel" id="packingPanel" style="display: none;">
+                <div class="panel-title">📦 打包配置</div>
+                
+                <div class="input-group">
+                    <label class="input-label">打包算法</label>
+                    <div class="algorithm-cards">
+                        <div class="algorithm-card selected" onclick="selectAlgorithm('maxrects')">
+                            <div class="algorithm-name">MaxRects</div>
+                            <div class="algorithm-desc">最流行，优化率高</div>
+                        </div>
+                        <div class="algorithm-card" onclick="selectAlgorithm('packer')">
+                            <div class="algorithm-name">Packer</div>
+                            <div class="algorithm-desc">简单快速</div>
+                        </div>
+                        <div class="algorithm-card" onclick="selectAlgorithm('skyline')">
+                            <div class="algorithm-name">Skyline</div>
+                            <div class="algorithm-desc">条形排列</div>
+                        </div>
+                        <div class="algorithm-card" onclick="selectAlgorithm('guillotine')">
+                            <div class="algorithm-name">Guillotine</div>
+                            <div class="algorithm-desc">切割算法</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label class="input-label">间距: <span id="paddingValue" style="color: var(--accent-blue); font-weight: 600;">4</span> px</label>
+                    <input type="range" id="paddingSlider" min="0" max="20" value="4" oninput="updatePadding()">
+                </div>
+
+                <div class="input-group">
+                    <label class="input-label">图集宽度: <span id="widthValue" style="color: var(--accent-blue); font-weight: 600;">1024</span> px</label>
+                    <select id="widthSelect">
+                        <option value="512">512</option>
+                        <option value="1024" selected>1024</option>
+                        <option value="2048">2048</option>
+                        <option value="4096">4096</option>
+                    </select>
+                </div>
+
+                <div class="input-group">
+                    <label class="input-label">排序方式</label>
+                    <select id="sortSelect">
+                        <option value="height">按高度降序</option>
+                        <option value="width">按宽度降序</option>
+                        <option value="area">按面积降序</option>
+                        <option value="none">不排序</option>
+                    </select>
+                </div>
+
+                <button class="btn btn-primary" onclick="runDetection()" style="margin-bottom: 8px;">
+                    <span>🔍</span> 运行AI检测
+                </button>
+                <button class="btn btn-green" onclick="generateSpritesheet()">
+                    <span>✨</span> 生成精灵图
+                </button>
+                <div style="height: 8px;"></div>
+                <button class="btn btn-secondary" onclick="goToExport()">
+                    <span>📤</span> 前往导出页面
+                </button>
+            </div>
+
+            <div class="panel" id="spriteListPanel" style="display: none;">
+                <div class="panel-title">📋 精灵列表</div>
+                <div id="spriteList" style="max-height: 300px; overflow-y: auto;">
+                </div>
+            </div>
+        </aside>
+
+        <section class="main-area">
+            <div class="preview-area">
+                <div id="placeholder" class="placeholder">
+                    <div class="placeholder-icon">📦</div>
+                    <div style="font-size: 18px; margin-bottom: 8px;">精灵图生成</div>
+                    <div style="font-size: 14px; color: var(--text-muted);">上传图片并运行检测后生成精灵图集</div>
+                </div>
+
+                <div id="previewContent" style="display: none; width: 100%;">
+                    <img class="spritesheet-preview" id="spritesheetImage">
+                    
+                    <div class="stats-container">
+                        <div class="stat-card">
+                            <div class="stat-value" id="spriteCount">0</div>
+                            <div class="stat-label">精灵数量</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="sheetWidth">0</div>
+                            <div class="stat-label">图集宽度</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="sheetHeight">0</div>
+                            <div class="stat-label">图集高度</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="packingEfficiency">0%</div>
+                            <div class="stat-label">打包效率</div>
+                        </div>
+                    </div>
+
+                    <div class="config-panel">
+                        <div class="config-header">
+                            <span class="config-title">📋 JSON配置数据</span>
+                            <button class="btn btn-secondary" style="width: auto; padding: 6px 12px; font-size: 12px;" onclick="copyConfig()">
+                                <span>📋</span> 复制
+                            </button>
+                        </div>
+                        <div class="config-content">
+                            <pre id="configJson"></pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <footer class="status-bar">
+        <div><span class="status-dot" id="statusDot"></span><span id="statusText">准备就绪</span></div>
+        <div style="color: var(--text-muted);">多种打包算法 · 实时配置预览</div>
+    </footer>
+
+    <script>
+        let currentImage = null;
+        let currentImageDataUrl = null;
+        let boxes = [];
+        let spritesheetData = null;
+        let selectedAlgorithm = 'maxrects';
+
+        const uploadArea = document.getElementById('uploadArea');
+
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('drag-over');
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('drag-over');
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('drag-over');
+            if (e.dataTransfer.files.length) {
+                handleFileSelect({ target: { files: e.dataTransfer.files } });
+            }
+        });
+
+        async function handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            setStatus('上传中...', 'warning');
+
+            try {
+                const response = await fetch('/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    currentImage = data;
+
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        currentImageDataUrl = e.target.result;
+                        document.getElementById('packingPanel').style.display = 'block';
+                        setStatus('上传成功', 'success');
+                    };
+                    reader.readAsDataURL(file);
+                } else {
+                    setStatus('上传失败', 'error');
+                }
+            } catch (error) {
+                setStatus('上传失败', 'error');
+            }
+        }
+
+        function selectAlgorithm(algo) {
+            selectedAlgorithm = algo;
+            document.querySelectorAll('.algorithm-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            document.querySelector(`[onclick="selectAlgorithm('${algo}')"]`).classList.add('selected');
+        }
+
+        function updatePadding() {
+            document.getElementById('paddingValue').textContent = document.getElementById('paddingSlider').value;
+        }
+
+        async function runDetection() {
+            if (!currentImage) {
+                alert('请先上传图片');
+                return;
+            }
+
+            setStatus('AI检测中...', 'warning');
+
+            try {
+                const response = await fetch('/auto-detect', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({})
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    boxes = data.boxes;
+                    renderSpriteList();
+                    setStatus(`检测完成：${boxes.length} 个对象`, 'success');
+                } else {
+                    const errData = await response.json();
+                    setStatus(`检测失败：${errData.error}`, 'error');
+                }
+            } catch (error) {
+                setStatus('检测失败', 'error');
+            }
+        }
+
+        function renderSpriteList() {
+            const container = document.getElementById('spriteList');
+            container.innerHTML = '';
+
+            boxes.forEach((box, index) => {
+                const item = document.createElement('div');
+                item.style.background = var(--bg-tertiary);
+                item.style.borderRadius = '4px';
+                item.style.padding = '8px';
+                item.style.marginBottom = '6px';
+                item.style.display = 'flex';
+                item.style.justifyContent = 'space-between';
+                item.style.alignItems = 'center';
+                
+                item.innerHTML = `
+                    <span style="font-size: 12px;">精灵 ${index + 1}</span>
+                    <span style="font-size: 11px; color: var(--text-muted);">${box.width}×${box.height}</span>
+                `;
+                container.appendChild(item);
+            });
+
+            document.getElementById('spriteListPanel').style.display = 'block';
+        }
+
+        async function generateSpritesheet() {
+            if (!currentImage || boxes.length === 0) {
+                alert('请先上传图片并运行检测');
+                return;
+            }
+
+            setStatus('生成精灵图中...', 'warning');
+
+            try {
+                const padding = parseInt(document.getElementById('paddingSlider').value);
+                const width = parseInt(document.getElementById('widthSelect').value);
+
+                const response = await fetch('/generate-spritesheet', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        padding: padding, 
+                        width: width,
+                        algorithm: selectedAlgorithm
+                    })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    spritesheetData = data.config;
+                    
+                    const img = document.getElementById('spritesheetImage');
+                    img.src = `/preview/spritesheet.png?t=${Date.now()}`;
+                    
+                    document.getElementById('placeholder').style.display = 'none';
+                    document.getElementById('previewContent').style.display = 'block';
+                    
+                    document.getElementById('spriteCount').textContent = data.spriteCount;
+                    document.getElementById('sheetWidth').textContent = data.config.width;
+                    document.getElementById('sheetHeight').textContent = data.config.height;
+                    
+                    const totalArea = data.spriteCount > 0 
+                        ? data.config.sprites.reduce((sum, s) => sum + s.width * s.height, 0)
+                        : 0;
+                    const sheetArea = data.config.width * data.config.height;
+                    const efficiency = sheetArea > 0 ? Math.round((totalArea / sheetArea) * 100) : 0;
+                    document.getElementById('packingEfficiency').textContent = efficiency + '%';
+                    
+                    document.getElementById('configJson').textContent = JSON.stringify(data.config, null, 2);
+                    
+                    setStatus('精灵图生成完成', 'success');
+                } else {
+                    const errData = await response.json();
+                    setStatus(`生成失败：${errData.error}`, 'error');
+                }
+            } catch (error) {
+                setStatus('生成失败', 'error');
+            }
+        }
+
+        function copyConfig() {
+            const text = document.getElementById('configJson').textContent;
+            navigator.clipboard.writeText(text).then(() => {
+                setStatus('配置已复制到剪贴板', 'success');
+                setTimeout(() => setStatus('准备就绪'), 2000);
+            }).catch(() => {
+                setStatus('复制失败', 'error');
+            });
+        }
+
+        function goToExport() {
+            window.location.href = '/export';
+        }
+
+        function setStatus(text, type = 'info') {
+            document.getElementById('statusText').textContent = text;
+            const statusDot = document.getElementById('statusDot');
+            
+            if (type === 'success') {
+                statusDot.style.background = '#2ecc71';
+            } else if (type === 'error') {
+                statusDot.style.background = '#e74c3c';
+            } else if (type === 'warning') {
+                statusDot.style.background = '#f39c12';
+            } else {
+                statusDot.style.background = '#2ecc71';
+            }
+        }
+    </script>
+</body>
+</html>
