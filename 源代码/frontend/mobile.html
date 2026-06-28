@@ -1,0 +1,967 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>AI游戏资源切割工具 - 手机版</title>
+    <style>
+        :root {
+            --bg-primary: #1a1a2e;
+            --bg-secondary: #16213e;
+            --text-primary: #e8e8e8;
+            --text-muted: #a0a0b0;
+            --accent-blue: #4a9eff;
+            --accent-green: #2ecc71;
+            --accent-purple: #9b59b6;
+            --border-color: #2a2a4a;
+            --card-bg: #1e1e3a;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+        }
+
+        .header {
+            background: var(--bg-secondary);
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border-color);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo {
+            font-size: 18px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo-icon {
+            width: 28px;
+            height: 28px;
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+        }
+
+        .nav-tabs {
+            display: flex;
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-color);
+            padding: 8px 0;
+            overflow-x: auto;
+            white-space: nowrap;
+        }
+
+        .nav-tab {
+            padding: 10px 16px;
+            font-size: 14px;
+            color: var(--text-muted);
+            cursor: pointer;
+            flex-shrink: 0;
+            border-radius: 6px;
+            margin: 0 4px;
+            transition: all 0.2s;
+        }
+
+        .nav-tab.active {
+            background: var(--accent-blue);
+            color: white;
+        }
+
+        .content {
+            padding: 16px;
+            padding-bottom: 120px;
+        }
+
+        .section {
+            margin-bottom: 16px;
+        }
+
+        .section-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 12px;
+        }
+
+        .upload-area {
+            border: 2px dashed var(--border-color);
+            border-radius: 12px;
+            padding: 40px 20px;
+            text-align: center;
+            background: var(--card-bg);
+            cursor: pointer;
+        }
+
+        .upload-icon {
+            font-size: 48px;
+            margin-bottom: 12px;
+        }
+
+        .upload-text {
+            font-size: 16px;
+            margin-bottom: 4px;
+        }
+
+        .upload-hint {
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 16px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent-blue), #6b7fff);
+            color: white;
+        }
+
+        .btn-green {
+            background: linear-gradient(135deg, var(--accent-green), #27ae60);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: var(--card-bg);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            color: white;
+        }
+
+        .input-group {
+            margin-bottom: 14px;
+        }
+
+        .input-label {
+            font-size: 14px;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            height: 8px;
+            border-radius: 4px;
+            background: var(--card-bg);
+            -webkit-appearance: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: var(--accent-blue);
+        }
+
+        input[type="number"] {
+            width: 100%;
+            padding: 14px;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 16px;
+        }
+
+        select {
+            width: 100%;
+            padding: 14px;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 16px;
+        }
+
+        .info-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+
+        .info-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .info-label {
+            color: var(--text-muted);
+        }
+
+        .info-value {
+            font-weight: 600;
+        }
+
+        .canvas-wrapper {
+            position: relative;
+            background: #2a2a4a;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 16px;
+        }
+
+        .canvas-image {
+            width: 100%;
+            display: block;
+        }
+
+        .cut-box {
+            position: absolute;
+            border: 2px solid var(--accent-blue);
+            background: rgba(74, 158, 255, 0.2);
+            border-radius: 4px;
+            z-index: 10;
+        }
+
+        .cut-box.selected {
+            border-color: var(--accent-green);
+            background: rgba(46, 204, 113, 0.25);
+        }
+
+        .cut-box .label {
+            position: absolute;
+            top: -24px;
+            left: 0;
+            background: var(--accent-blue);
+            color: white;
+            padding: 2px 8px;
+            font-size: 11px;
+            font-weight: 600;
+            border-radius: 3px;
+        }
+
+        .resize-handle {
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            background: white;
+            border: 2px solid var(--accent-green);
+            border-radius: 3px;
+            z-index: 20;
+        }
+
+        .resize-handle.se {
+            right: -8px;
+            bottom: -8px;
+        }
+
+        .preview-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+        }
+
+        .preview-item {
+            background: var(--card-bg);
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+        }
+
+        .preview-image {
+            width: 100%;
+            aspect-ratio: 1;
+            object-fit: contain;
+            background: #2a2a4a;
+        }
+
+        .preview-name {
+            padding: 8px;
+            font-size: 12px;
+            text-align: center;
+            word-break: break-all;
+        }
+
+        .placeholder {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-muted);
+        }
+
+        .placeholder-icon {
+            font-size: 64px;
+            margin-bottom: 16px;
+        }
+
+        .guide-line {
+            position: absolute;
+            background: rgba(155, 89, 182, 0.8);
+            pointer-events: none;
+            z-index: 5;
+        }
+
+        .guide-line-horizontal {
+            height: 2px;
+            left: 0;
+            right: 0;
+        }
+
+        .guide-line-vertical {
+            width: 2px;
+            top: 0;
+            bottom: 0;
+        }
+
+        .quick-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .quick-btn {
+            flex: 1;
+            padding: 12px;
+            font-size: 14px;
+        }
+
+        .help-text {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 10px;
+            padding: 10px;
+            background: var(--card-bg);
+            border-radius: 6px;
+        }
+
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--bg-secondary);
+            border-top: 1px solid var(--border-color);
+            padding: 12px 16px;
+            display: flex;
+            gap: 10px;
+            z-index: 100;
+        }
+
+        .bottom-btn {
+            flex: 1;
+            padding: 14px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 500;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .fab {
+            position: fixed;
+            bottom: 80px;
+            right: 20px;
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent-blue), #6b7fff);
+            color: white;
+            border: none;
+            font-size: 24px;
+            box-shadow: 0 4px 12px rgba(74, 158, 255, 0.4);
+            cursor: pointer;
+            z-index: 100;
+        }
+
+        .status-bar {
+            padding: 10px 16px;
+            font-size: 13px;
+            color: var(--text-muted);
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="logo">
+            <div class="logo-icon">🎮</div>
+            <span>AI资源切割</span>
+        </div>
+    </header>
+
+    <div class="nav-tabs">
+        <div class="nav-tab active" onclick="showTab('original')">🖼️ 原图</div>
+        <div class="nav-tab" onclick="showTab('detection')">✂️ 切割</div>
+        <div class="nav-tab" onclick="showTab('ninepatch')">📐 九宫格</div>
+        <div class="nav-tab" onclick="showTab('preview')">👁️ 预览</div>
+    </div>
+
+    <div class="content">
+        <div class="section">
+            <div class="section-title">📁 上传图片</div>
+            <div class="upload-area" id="uploadArea" onclick="document.getElementById('fileInput').click()">
+                <input type="file" id="fileInput" accept="image/*" style="display: none;" onchange="handleFileSelect(event)">
+                <div class="upload-icon">📤</div>
+                <div class="upload-text">点击上传图片</div>
+                <div class="upload-hint">支持 PNG、JPG、WebP</div>
+            </div>
+        </div>
+
+        <div class="section" id="detectionSection" style="display: none;">
+            <div class="section-title">🔍 检测设置</div>
+            
+            <div class="input-group">
+                <label class="input-label">检测模式</label>
+                <select id="detectionMode">
+                    <option value="external">外部轮廓</option>
+                    <option value="hierarchical">层级轮廓</option>
+                </select>
+            </div>
+
+            <div class="input-group">
+                <label class="input-label">最小面积阈值</label>
+                <input type="range" id="minAreaSlider" min="10" max="500" value="50" oninput="updateMinArea()">
+                <div style="text-align: right; font-size: 14px; color: var(--accent-blue); margin-top: 4px;" id="minAreaValue">50 px²</div>
+            </div>
+
+            <button class="btn btn-primary" onclick="runDetection()">
+                <span>🔍</span> 手动检测
+            </button>
+            <button class="btn btn-green" onclick="runAutoDetection()">
+                <span>🤖</span> AI自动检测
+            </button>
+
+            <div class="info-card">
+                <div class="info-row">
+                    <span class="info-label">检测对象</span>
+                    <span class="info-value" id="cutBoxCount">0</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">处理时间</span>
+                    <span class="info-value" id="processTime">-</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="section" id="editSection" style="display: none;">
+            <div class="section-title">✏️ 编辑切割框</div>
+            <div class="help-text">
+                💡 点击选中 · 拖拽移动 · 缩放调整
+            </div>
+            
+            <div class="quick-actions">
+                <button class="btn btn-danger quick-btn" onclick="deleteSelectedBox()">🗑️ 删除</button>
+                <button class="btn btn-secondary quick-btn" onclick="clearAllBoxes()">🧹 清空</button>
+            </div>
+        </div>
+
+        <div class="section" id="ninePatchSection" style="display: none;">
+            <div class="section-title">📐 九宫格边距</div>
+            
+            <div class="input-group">
+                <label class="input-label">左边距</label>
+                <input type="number" id="nineLeft" value="20" min="0" max="500" oninput="renderGuideLines()">
+            </div>
+            <div class="input-group">
+                <label class="input-label">右边距</label>
+                <input type="number" id="nineRight" value="20" min="0" max="500" oninput="renderGuideLines()">
+            </div>
+            <div class="input-group">
+                <label class="input-label">上边距</label>
+                <input type="number" id="nineTop" value="20" min="0" max="500" oninput="renderGuideLines()">
+            </div>
+            <div class="input-group">
+                <label class="input-label">下边距</label>
+                <input type="number" id="nineBottom" value="20" min="0" max="500" oninput="renderGuideLines()">
+            </div>
+            
+            <button class="btn btn-secondary" onclick="syncMargins()">🔗 同步边距</button>
+        </div>
+
+        <div class="canvas-wrapper" id="canvasWrapper" style="display: none;">
+            <img class="canvas-image" id="mainImage">
+            <div id="boxesContainer"></div>
+            <div id="guideLinesContainer"></div>
+        </div>
+
+        <div class="placeholder" id="placeholder">
+            <div class="placeholder-icon">🖼️</div>
+            <div style="font-size: 16px; margin-bottom: 8px;">等待上传图片</div>
+            <div style="font-size: 14px; color: var(--text-muted);">上传游戏资源图集开始工作</div>
+        </div>
+
+        <div id="previewContainer" style="display: none;">
+            <div class="section-title">📦 导出预览</div>
+            <div class="preview-grid" id="previewContent"></div>
+        </div>
+    </div>
+
+    <div class="bottom-nav" id="bottomNav" style="display: none;">
+        <button class="bottom-btn btn-primary" onclick="exportCuts()">✂️ 导出切图</button>
+        <button class="bottom-btn btn-green" onclick="generateSpritesheet()">📦 生成精灵图</button>
+    </div>
+
+    <button class="fab" id="addBoxBtn" style="display: none;" onclick="addManualBox()">➕</button>
+
+    <div class="status-bar" id="statusBar">
+        <span id="statusText">准备就绪</span>
+    </div>
+
+    <script>
+        let currentImage = null;
+        let boxes = [];
+        let selectedBoxIndex = -1;
+        let exportedFiles = [];
+        let spritesheetData = null;
+
+        let isDragging = false;
+        let isResizing = false;
+        let dragStartX = 0;
+        let dragStartY = 0;
+        let boxStartX = 0;
+        let boxStartY = 0;
+        let boxStartW = 0;
+        let boxStartH = 0;
+
+        const uploadArea = document.getElementById('uploadArea');
+
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.style.borderColor = '#4a9eff';
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.style.borderColor = '#2a2a4a';
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.style.borderColor = '#2a2a4a';
+            if (e.dataTransfer.files.length) {
+                handleFileSelect({ target: { files: e.dataTransfer.files } });
+            }
+        });
+
+        async function handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            setStatus('上传中...');
+
+            try {
+                const response = await fetch('/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    currentImage = data;
+
+                    const img = document.getElementById('mainImage');
+                    img.src = URL.createObjectURL(file);
+                    img.onload = () => {
+                        document.getElementById('placeholder').style.display = 'none';
+                        document.getElementById('canvasWrapper').style.display = 'block';
+                        
+                        document.getElementById('detectionSection').style.display = 'block';
+                        document.getElementById('ninePatchSection').style.display = 'block';
+                        
+                        setStatus('上传成功');
+                    };
+                } else {
+                    setStatus('上传失败');
+                }
+            } catch (error) {
+                setStatus('上传失败');
+            }
+        }
+
+        function updateMinArea() {
+            const value = document.getElementById('minAreaSlider').value;
+            document.getElementById('minAreaValue').textContent = value + ' px²';
+        }
+
+        async function runDetection() {
+            if (!currentImage) {
+                alert('请先上传图片');
+                return;
+            }
+
+            setStatus('检测中...');
+
+            try {
+                const minArea = parseInt(document.getElementById('minAreaSlider').value);
+                const mode = document.getElementById('detectionMode').value;
+
+                const response = await fetch('/detect', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ min_area: minArea, mode: mode })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    boxes = data.boxes;
+                    selectedBoxIndex = -1;
+                    renderBoxes();
+                    updateStats();
+                    setStatus(`检测完成：${boxes.length} 个对象`);
+                } else {
+                    setStatus('检测失败');
+                }
+            } catch (error) {
+                setStatus('检测失败');
+            }
+        }
+
+        async function runAutoDetection() {
+            if (!currentImage) {
+                alert('请先上传图片');
+                return;
+            }
+
+            setStatus('AI检测中...');
+
+            try {
+                const response = await fetch('/auto-detect', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({})
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    boxes = data.boxes;
+                    selectedBoxIndex = -1;
+                    renderBoxes();
+                    updateStats();
+                    setStatus('AI检测完成');
+                } else {
+                    setStatus('检测失败');
+                }
+            } catch (error) {
+                setStatus('检测失败');
+            }
+        }
+
+        function renderBoxes() {
+            const container = document.getElementById('boxesContainer');
+            container.innerHTML = '';
+
+            boxes.forEach((box, index) => {
+                const div = document.createElement('div');
+                div.className = 'cut-box' + (selectedBoxIndex === index ? ' selected' : '');
+                
+                const scale = getScale();
+                div.style.left = (box.x * scale) + 'px';
+                div.style.top = (box.y * scale) + 'px';
+                div.style.width = (box.width * scale) + 'px';
+                div.style.height = (box.height * scale) + 'px';
+
+                div.innerHTML = `<div class="label">${index + 1}</div><div class="resize-handle se"></div>`;
+
+                div.addEventListener('click', (e) => {
+                    selectedBoxIndex = index;
+                    renderBoxes();
+                });
+
+                div.addEventListener('touchstart', (e) => {
+                    e.preventDefault();
+                    selectedBoxIndex = index;
+                    isDragging = true;
+                    const touch = e.touches[0];
+                    dragStartX = touch.clientX;
+                    dragStartY = touch.clientY;
+                    boxStartX = box.x;
+                    boxStartY = box.y;
+                    renderBoxes();
+                });
+
+                container.appendChild(div);
+            });
+
+            document.addEventListener('touchmove', onTouchMove);
+            document.addEventListener('touchend', onTouchEnd);
+
+            document.getElementById('cutBoxCount').textContent = boxes.length;
+
+            if (boxes.length > 0) {
+                document.getElementById('editSection').style.display = 'block';
+                document.getElementById('bottomNav').style.display = 'flex';
+                document.getElementById('addBoxBtn').style.display = 'block';
+            } else {
+                document.getElementById('editSection').style.display = 'none';
+                document.getElementById('bottomNav').style.display = 'none';
+                document.getElementById('addBoxBtn').style.display = 'none';
+            }
+        }
+
+        function getScale() {
+            if (!currentImage) return 1;
+            const container = document.getElementById('canvasWrapper');
+            const img = document.getElementById('mainImage');
+            return container.clientWidth / currentImage.width;
+        }
+
+        function onTouchMove(e) {
+            if (!isDragging || selectedBoxIndex < 0) return;
+
+            const touch = e.touches[0];
+            const scale = getScale();
+            const dx = (touch.clientX - dragStartX) / scale;
+            const dy = (touch.clientY - dragStartY) / scale;
+
+            let newX = Math.round(boxStartX + dx);
+            let newY = Math.round(boxStartY + dy);
+
+            newX = Math.max(0, Math.min(newX, currentImage.width - boxes[selectedBoxIndex].width));
+            newY = Math.max(0, Math.min(newY, currentImage.height - boxes[selectedBoxIndex].height));
+
+            boxes[selectedBoxIndex].x = newX;
+            boxes[selectedBoxIndex].y = newY;
+
+            const div = document.getElementById('boxesContainer').children[selectedBoxIndex];
+            div.style.left = (newX * scale) + 'px';
+            div.style.top = (newY * scale) + 'px';
+        }
+
+        function onTouchEnd() {
+            isDragging = false;
+        }
+
+        function deleteSelectedBox() {
+            if (selectedBoxIndex >= 0 && selectedBoxIndex < boxes.length) {
+                boxes.splice(selectedBoxIndex, 1);
+                selectedBoxIndex = -1;
+                renderBoxes();
+                setStatus('已删除切割框');
+            } else {
+                alert('请先点击选中一个框');
+            }
+        }
+
+        function clearAllBoxes() {
+            if (confirm('确定清空所有切割框？')) {
+                boxes = [];
+                selectedBoxIndex = -1;
+                renderBoxes();
+                setStatus('已清空切割框');
+            }
+        }
+
+        function addManualBox() {
+            if (!currentImage) return;
+
+            const w = Math.floor(currentImage.width / 4);
+            const h = Math.floor(currentImage.height / 4);
+            const x = Math.floor(currentImage.width / 2 - w / 2);
+            const y = Math.floor(currentImage.height / 2 - h / 2);
+            
+            boxes.push({ x, y, width: w, height: h, area: w * h });
+            selectedBoxIndex = boxes.length - 1;
+            renderBoxes();
+            setStatus('已添加新框');
+        }
+
+        function updateStats() {
+            document.getElementById('processTime').textContent = '-';
+        }
+
+        function renderGuideLines() {
+            if (!currentImage) return;
+
+            const container = document.getElementById('guideLinesContainer');
+            container.innerHTML = '';
+
+            const w = currentImage.width;
+            const h = currentImage.height;
+            const scale = getScale();
+            const left = parseInt(document.getElementById('nineLeft').value);
+            const right = parseInt(document.getElementById('nineRight').value);
+            const top = parseInt(document.getElementById('nineTop').value);
+            const bottom = parseInt(document.getElementById('nineBottom').value);
+
+            const lines = [
+                { type: 'vertical', pos: left },
+                { type: 'vertical', pos: w - right },
+                { type: 'horizontal', pos: top },
+                { type: 'horizontal', pos: h - bottom }
+            ];
+
+            lines.forEach(line => {
+                const div = document.createElement('div');
+                div.className = 'guide-line ' + (line.type === 'vertical' ? 'guide-line-vertical' : 'guide-line-horizontal');
+                if (line.type === 'vertical') {
+                    div.style.left = (line.pos * scale) + 'px';
+                } else {
+                    div.style.top = (line.pos * scale) + 'px';
+                }
+                container.appendChild(div);
+            });
+        }
+
+        function syncMargins() {
+            const val = document.getElementById('nineLeft').value;
+            document.getElementById('nineRight').value = val;
+            document.getElementById('nineTop').value = val;
+            document.getElementById('nineBottom').value = val;
+            renderGuideLines();
+        }
+
+        async function exportCuts() {
+            if (!currentImage || boxes.length === 0) {
+                alert('请先上传图片并检测');
+                return;
+            }
+
+            setStatus('导出中...');
+
+            try {
+                const response = await fetch('/cut', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        nine_patch: {
+                            left: parseInt(document.getElementById('nineLeft').value),
+                            right: parseInt(document.getElementById('nineRight').value),
+                            top: parseInt(document.getElementById('nineTop').value),
+                            bottom: parseInt(document.getElementById('nineBottom').value)
+                        }
+                    })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    exportedFiles = data.config.output_files;
+                    setStatus(`导出完成：${exportedFiles.length} 张`);
+                    showTab('preview');
+                } else {
+                    setStatus('导出失败');
+                }
+            } catch (error) {
+                setStatus('导出失败');
+            }
+        }
+
+        async function generateSpritesheet() {
+            if (!currentImage || boxes.length === 0) {
+                alert('请先上传图片并检测');
+                return;
+            }
+
+            setStatus('生成中...');
+
+            try {
+                const response = await fetch('/generate-spritesheet', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ padding: 4, width: 1024 })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    spritesheetData = { filename: 'spritesheet.png', spriteCount: data.spriteCount };
+                    setStatus('精灵图生成完成');
+                    showTab('preview');
+                } else {
+                    setStatus('生成失败');
+                }
+            } catch (error) {
+                setStatus('生成失败');
+            }
+        }
+
+        function showTab(tabName) {
+            document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+            document.querySelector(`[onclick="showTab('${tabName}')"]`).classList.add('active');
+
+            document.getElementById('canvasWrapper').style.display = 'none';
+            document.getElementById('placeholder').style.display = 'none';
+            document.getElementById('previewContainer').style.display = 'none';
+            document.getElementById('guideLinesContainer').style.display = 'none';
+            document.getElementById('boxesContainer').style.display = 'none';
+
+            if (tabName === 'original') {
+                document.getElementById('canvasWrapper').style.display = currentImage ? 'block' : 'none';
+                document.getElementById('placeholder').style.display = currentImage ? 'none' : 'block';
+            } else if (tabName === 'detection') {
+                document.getElementById('canvasWrapper').style.display = currentImage ? 'block' : 'none';
+                document.getElementById('placeholder').style.display = currentImage ? 'none' : 'block';
+                document.getElementById('boxesContainer').style.display = 'block';
+            } else if (tabName === 'ninepatch') {
+                document.getElementById('canvasWrapper').style.display = currentImage ? 'block' : 'none';
+                document.getElementById('placeholder').style.display = currentImage ? 'none' : 'block';
+                document.getElementById('guideLinesContainer').style.display = 'block';
+                renderGuideLines();
+            } else if (tabName === 'preview') {
+                document.getElementById('previewContainer').style.display = 'block';
+                const content = document.getElementById('previewContent');
+                content.innerHTML = '';
+
+                if (spritesheetData) {
+                    const item = document.createElement('div');
+                    item.className = 'preview-item';
+                    item.style.gridColumn = '1 / -1';
+                    item.innerHTML = `<img class="preview-image" src="/preview/${spritesheetData.filename}?t=${Date.now()}"><div class="preview-name">精灵图合集</div>`;
+                    content.appendChild(item);
+                }
+
+                exportedFiles.forEach((filename, index) => {
+                    const item = document.createElement('div');
+                    item.className = 'preview-item';
+                    item.innerHTML = `<img class="preview-image" src="/preview/${filename}?t=${Date.now()}"><div class="preview-name">${index + 1}</div>`;
+                    content.appendChild(item);
+                });
+
+                if (!spritesheetData && exportedFiles.length === 0) {
+                    content.innerHTML = `<div style="grid-column: 1/-1; padding: 40px; text-align: center; color: var(--text-muted);">暂无导出内容</div>`;
+                }
+            }
+        }
+
+        function setStatus(text) {
+            document.getElementById('statusText').textContent = text;
+        }
+    </script>
+</body>
+</html>
