@@ -1,0 +1,1042 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>九宫格配置 - AI游戏资源切割工具</title>
+    <style>
+        :root {
+            --bg-primary: #1a1a2e;
+            --bg-secondary: #16213e;
+            --bg-tertiary: #0f0f23;
+            --text-primary: #e8e8e8;
+            --text-muted: #a0a0b0;
+            --accent-blue: #4a9eff;
+            --accent-green: #2ecc71;
+            --accent-purple: #9b59b6;
+            --border-color: #2a2a4a;
+            --card-bg: #1e1e3a;
+            --btn-hover: #2a2a5a;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .header {
+            background: var(--bg-secondary);
+            padding: 12px 24px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .logo {
+            font-size: 20px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo-icon {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+
+        .nav-menu {
+            display: flex;
+            gap: 8px;
+        }
+
+        .nav-item {
+            padding: 8px 16px;
+            border-radius: 6px;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+
+        .nav-item:hover {
+            background: var(--btn-hover);
+            color: var(--text-primary);
+        }
+
+        .nav-item.active {
+            background: var(--accent-blue);
+            color: white;
+        }
+
+        .content {
+            flex: 1;
+            display: flex;
+            overflow: hidden;
+        }
+
+        .sidebar {
+            width: 360px;
+            background: var(--bg-secondary);
+            border-right: 1px solid var(--border-color);
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .main-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .panel {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .panel-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 12px 16px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent-blue), #6b7fff);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(74, 158, 255, 0.4);
+        }
+
+        .btn-green {
+            background: linear-gradient(135deg, var(--accent-green), #27ae60);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-secondary:hover {
+            background: var(--btn-hover);
+        }
+
+        .input-group {
+            margin-bottom: 14px;
+        }
+
+        .input-label {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+            display: block;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            -webkit-appearance: none;
+            height: 6px;
+            border-radius: 3px;
+            background: var(--bg-tertiary);
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: var(--accent-blue);
+            cursor: pointer;
+        }
+
+        input[type="number"], select {
+            width: 100%;
+            padding: 10px 12px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            color: var(--text-primary);
+            font-size: 14px;
+        }
+
+        .upload-area {
+            border: 2px dashed var(--border-color);
+            border-radius: 10px;
+            padding: 30px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: var(--card-bg);
+            margin-bottom: 20px;
+        }
+
+        .upload-area:hover, .upload-area.drag-over {
+            border-color: var(--accent-blue);
+            background: var(--btn-hover);
+        }
+
+        .upload-icon {
+            font-size: 36px;
+            margin-bottom: 10px;
+        }
+
+        .preview-container {
+            flex: 1;
+            padding: 20px;
+            overflow: auto;
+            background: var(--bg-tertiary);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .canvas-wrapper {
+            position: relative;
+            background: linear-gradient(45deg, #2a2a4a 25%, transparent 25%, transparent 75%, #2a2a4a 75%, #2a2a4a), 
+                        linear-gradient(45deg, #2a2a4a 25%, transparent 25%, transparent 75%, #2a2a4a 75%, #2a2a4a);
+            background-size: 20px 20px;
+            background-position: 0 0, 10px 10px;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            max-width: 100%;
+        }
+
+        .canvas-image {
+            max-width: 100%;
+            display: block;
+            border-radius: 8px;
+        }
+
+        .guide-line {
+            position: absolute;
+            background: rgba(255, 100, 100, 0.8);
+            pointer-events: auto;
+            z-index: 10;
+            cursor: move;
+            transition: all 0.2s;
+        }
+
+        .guide-line:hover {
+            background: rgba(255, 100, 100, 1);
+            box-shadow: 0 0 8px rgba(255, 100, 100, 0.6);
+        }
+
+        .guide-line-horizontal {
+            height: 4px;
+            left: 0;
+            right: 0;
+            cursor: row-resize;
+        }
+
+        .guide-line-vertical {
+            width: 4px;
+            top: 0;
+            bottom: 0;
+            cursor: col-resize;
+        }
+
+        .guide-line-handle {
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            background: #ff6666;
+            border: 2px solid white;
+            border-radius: 50%;
+            cursor: grab;
+            z-index: 20;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .guide-line:hover .guide-line-handle {
+            opacity: 1;
+        }
+
+        .guide-line-horizontal .guide-line-handle {
+            top: 50%;
+            right: 8px;
+            transform: translateY(-50%);
+        }
+
+        .guide-line-vertical .guide-line-handle {
+            left: 50%;
+            bottom: 8px;
+            transform: translateX(-50%);
+        }
+
+        .region-label {
+            position: absolute;
+            background: rgba(74, 158, 255, 0.9);
+            color: white;
+            font-size: 11px;
+            font-weight: 600;
+            padding: 3px 8px;
+            border-radius: 4px;
+            pointer-events: none;
+            z-index: 15;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+        }
+
+        .nine-patch-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 4px;
+            max-width: 600px;
+            width: 100%;
+            background: var(--bg-secondary);
+            padding: 4px;
+            border-radius: 8px;
+        }
+
+        .nine-patch-cell {
+            aspect-ratio: 1;
+            background: linear-gradient(45deg, #2a2a4a 25%, transparent 25%, transparent 75%, #2a2a4a 75%, #2a2a4a);
+            background-size: 10px 10px;
+            background-position: 0 0, 5px 5px;
+            border-radius: 4px;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .nine-patch-cell img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .nine-patch-cell-label {
+            position: absolute;
+            bottom: 4px;
+            right: 4px;
+            background: rgba(74, 158, 255, 0.8);
+            color: white;
+            font-size: 10px;
+            font-weight: 600;
+            padding: 2px 6px;
+            border-radius: 3px;
+        }
+
+        .nine-patch-cell.corner .nine-patch-cell-label {
+            background: rgba(231, 76, 60, 0.8);
+        }
+
+        .nine-patch-cell.edge .nine-patch-cell-label {
+            background: rgba(243, 156, 18, 0.8);
+        }
+
+        .nine-patch-cell.center .nine-patch-cell-label {
+            background: rgba(46, 204, 113, 0.8);
+        }
+
+        .stretch-preview {
+            width: 100%;
+            max-width: 800px;
+        }
+
+        .stretch-title {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            text-align: center;
+        }
+
+        .stretch-compare {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .stretch-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            background: var(--card-bg);
+            padding: 16px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+        }
+
+        .stretch-item-label {
+            font-size: 12px;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .stretched-image {
+            border-radius: 4px;
+            background: linear-gradient(45deg, #2a2a4a 25%, transparent 25%, transparent 75%, #2a2a4a 75%, #2a2a4a);
+            background-size: 10px 10px;
+            background-position: 0 0, 5px 5px;
+        }
+
+        .placeholder {
+            text-align: center;
+            color: var(--text-muted);
+            padding: 60px;
+        }
+
+        .placeholder-icon {
+            font-size: 64px;
+            margin-bottom: 16px;
+        }
+
+        .status-bar {
+            background: var(--bg-secondary);
+            border-top: 1px solid var(--border-color);
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 13px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--accent-green);
+            display: inline-block;
+            margin-right: 8px;
+        }
+
+        .info-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 14px;
+            margin-bottom: 14px;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 13px;
+        }
+
+        .info-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .info-label {
+            color: var(--text-muted);
+        }
+
+        .info-value {
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="logo">
+            <div class="logo-icon">🎮</div>
+            <span>AI游戏资源切割工具</span>
+        </div>
+        <nav class="nav-menu">
+            <a href="/" class="nav-item">🏠 工作台</a>
+            <a href="/ai-slicing" class="nav-item">🤖 AI切割</a>
+            <a href="/spritesheet" class="nav-item">📦 精灵图</a>
+            <a href="/nine-patch" class="nav-item active">📐 九宫格</a>
+            <a href="/animation" class="nav-item">🎬 动画生成</a>
+            <a href="/export" class="nav-item">📤 导出</a>
+        </nav>
+    </header>
+
+    <div class="content">
+        <aside class="sidebar">
+            <div class="panel">
+                <div class="panel-title">📁 上传图片</div>
+                <div class="upload-area" id="uploadArea" onclick="document.getElementById('fileInput').click()">
+                    <input type="file" id="fileInput" accept="image/*" style="display: none;" onchange="handleFileSelect(event)">
+                    <div class="upload-icon">📤</div>
+                    <div style="font-size: 14px;">点击或拖拽上传</div>
+                    <div style="font-size: 12px; color: var(--text-muted); margin-top: 6px;">PNG, JPG, WebP</div>
+                </div>
+            </div>
+
+            <div class="panel" id="paramsPanel" style="display: none;">
+                <div class="panel-title">⚙️ 九宫格参数</div>
+
+                <div class="info-card" id="imageInfoCard">
+                    <div class="info-row">
+                        <span class="info-label">图片尺寸</span>
+                        <span class="info-value" id="imageSize">-</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">可设边距</span>
+                        <span class="info-value" id="marginRange">-</span>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label class="input-label">左边距: <span id="leftValue" style="color: var(--accent-blue); font-weight: 600;">20</span> px</label>
+                    <input type="range" id="leftSlider" min="0" max="100" value="20" oninput="updateMargin('left')">
+                    <input type="number" id="leftInput" value="20" min="0" oninput="syncMargin('left')">
+                </div>
+
+                <div class="input-group">
+                    <label class="input-label">右边距: <span id="rightValue" style="color: var(--accent-blue); font-weight: 600;">20</span> px</label>
+                    <input type="range" id="rightSlider" min="0" max="100" value="20" oninput="updateMargin('right')">
+                    <input type="number" id="rightInput" value="20" min="0" oninput="syncMargin('right')">
+                </div>
+
+                <div class="input-group">
+                    <label class="input-label">上边距: <span id="topValue" style="color: var(--accent-blue); font-weight: 600;">20</span> px</label>
+                    <input type="range" id="topSlider" min="0" max="100" value="20" oninput="updateMargin('top')">
+                    <input type="number" id="topInput" value="20" min="0" oninput="syncMargin('top')">
+                </div>
+
+                <div class="input-group">
+                    <label class="input-label">下边距: <span id="bottomValue" style="color: var(--accent-blue); font-weight: 600;">20</span> px</label>
+                    <input type="range" id="bottomSlider" min="0" max="100" value="20" oninput="updateMargin('bottom')">
+                    <input type="number" id="bottomInput" value="20" min="0" oninput="syncMargin('bottom')">
+                </div>
+
+                <button class="btn btn-secondary" onclick="syncAllMargins()" style="margin-bottom: 8px;">
+                    <span>🔗</span> 同步所有边距
+                </button>
+
+                <button class="btn btn-primary" onclick="applyNinePatch()">
+                    <span>✨</span> 应用九宫格
+                </button>
+                <div style="height: 8px;"></div>
+                <button class="btn btn-green" onclick="exportNinePatch()">
+                    <span>📤</span> 导出九宫格
+                </button>
+            </div>
+
+            <div class="panel">
+                <div class="panel-title">💡 使用说明</div>
+                <div style="font-size: 12px; color: var(--text-muted); line-height: 1.6;">
+                    <p>• <strong>上传图片</strong>：选择需要处理的UI图片</p>
+                    <p>• <strong>调整边距</strong>：设置四个方向的拉伸边界</p>
+                    <p>• <strong>拖拽辅助线</strong>：在预览区拖动红色线条调整</p>
+                    <p>• <strong>应用效果</strong>：查看九宫格分割和拉伸预览</p>
+                    <p>• <strong>导出资源</strong>：保存为9张独立图片</p>
+                    <br>
+                    <p><strong>区域说明：</strong></p>
+                    <p>🔴 <strong>四角</strong>：不拉伸，保持原样</p>
+                    <p>🟠 <strong>四边</strong>：单向拉伸</p>
+                    <p>🟢 <strong>中心</strong>：双向拉伸</p>
+                </div>
+            </div>
+        </aside>
+
+        <section class="main-area">
+            <div class="preview-container">
+                <div id="placeholder" class="placeholder">
+                    <div class="placeholder-icon">📐</div>
+                    <div style="font-size: 18px; margin-bottom: 8px;">九宫格配置工具</div>
+                    <div style="font-size: 14px; color: var(--text-muted);">上传图片开始设置九宫格参数</div>
+                </div>
+
+                <div id="previewContent" style="display: none; width: 100%;">
+                    <div style="font-size: 16px; font-weight: 600; margin-bottom: 12px;">🖼️ 原图预览（拖拽红色线条调整）</div>
+                    <div class="canvas-wrapper" id="canvasWrapper">
+                        <img class="canvas-image" id="mainImage">
+                        <div id="guideLinesContainer"></div>
+                    </div>
+
+                    <div style="font-size: 16px; font-weight: 600; margin-top: 20px; margin-bottom: 12px;">🧩 九宫格分割预览</div>
+                    <div class="nine-patch-grid" id="ninePatchGrid"></div>
+
+                    <div class="stretch-preview">
+                        <div class="stretch-title">📏 拉伸效果对比</div>
+                        <div class="stretch-compare">
+                            <div class="stretch-item">
+                                <div class="stretch-item-label">原始大小</div>
+                                <img id="stretchOriginal" class="stretched-image">
+                            </div>
+                            <div class="stretch-item">
+                                <div class="stretch-item-label">横向拉伸</div>
+                                <img id="stretchHorizontal" class="stretched-image">
+                            </div>
+                            <div class="stretch-item">
+                                <div class="stretch-item-label">纵向拉伸</div>
+                                <img id="stretchVertical" class="stretched-image">
+                            </div>
+                            <div class="stretch-item">
+                                <div class="stretch-item-label">双向拉伸</div>
+                                <img id="stretchBoth" class="stretched-image">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <footer class="status-bar">
+        <div><span class="status-dot" id="statusDot"></span><span id="statusText">准备就绪</span></div>
+        <div style="color: var(--text-muted);">可视化九宫格 · 实时拉伸预览</div>
+    </footer>
+
+    <script>
+        let currentImage = null;
+        let currentImageDataUrl = null;
+        let ninePatch = { left: 20, right: 20, top: 20, bottom: 20 };
+        
+        let isDraggingGuide = false;
+        let dragGuideName = '';
+        let dragStartX = 0;
+        let dragStartY = 0;
+        let dragStartPos = 0;
+
+        const uploadArea = document.getElementById('uploadArea');
+
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('drag-over');
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('drag-over');
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('drag-over');
+            if (e.dataTransfer.files.length) {
+                handleFileSelect({ target: { files: e.dataTransfer.files } });
+            }
+        });
+
+        async function handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            setStatus('上传中...', 'warning');
+
+            try {
+                const response = await fetch('/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    currentImage = data;
+
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        currentImageDataUrl = e.target.result;
+                        
+                        const img = document.getElementById('mainImage');
+                        img.src = currentImageDataUrl;
+                        img.onload = () => {
+                            document.getElementById('placeholder').style.display = 'none';
+                            document.getElementById('previewContent').style.display = 'block';
+                            
+                            document.getElementById('imageSize').textContent = `${data.width}×${data.height}`;
+                            document.getElementById('marginRange').textContent = `0-${Math.floor(data.width/2)}px`;
+                            
+                            const maxMargin = Math.floor(Math.min(data.width, data.height) / 2);
+                            ['left', 'right', 'top', 'bottom'].forEach(key => {
+                                document.getElementById(`${key}Slider`).max = maxMargin;
+                                document.getElementById(`${key}Input`).max = maxMargin;
+                            });
+                            
+                            document.getElementById('paramsPanel').style.display = 'block';
+                            renderGuideLines();
+                            renderNinePatchGrid();
+                            renderStretchPreview();
+                            
+                            setStatus('上传成功', 'success');
+                        };
+                    };
+                    reader.readAsDataURL(file);
+                } else {
+                    setStatus('上传失败', 'error');
+                }
+            } catch (error) {
+                setStatus('上传失败', 'error');
+            }
+        }
+
+        function updateMargin(key) {
+            const slider = document.getElementById(`${key}Slider`);
+            const input = document.getElementById(`${key}Input`);
+            const value = slider.value;
+            
+            input.value = value;
+            document.getElementById(`${key}Value`).textContent = value;
+            ninePatch[key] = parseInt(value);
+            
+            if (currentImage) {
+                renderGuideLines();
+                renderNinePatchGrid();
+                renderStretchPreview();
+            }
+        }
+
+        function syncMargin(key) {
+            const input = document.getElementById(`${key}Input`);
+            const slider = document.getElementById(`${key}Slider`);
+            let value = parseInt(input.value) || 0;
+            
+            const maxMargin = parseInt(slider.max);
+            value = Math.max(0, Math.min(value, maxMargin));
+            
+            input.value = value;
+            slider.value = value;
+            document.getElementById(`${key}Value`).textContent = value;
+            ninePatch[key] = value;
+            
+            if (currentImage) {
+                renderGuideLines();
+                renderNinePatchGrid();
+                renderStretchPreview();
+            }
+        }
+
+        function syncAllMargins() {
+            const value = ninePatch.left;
+            ['left', 'right', 'top', 'bottom'].forEach(key => {
+                document.getElementById(`${key}Slider`).value = value;
+                document.getElementById(`${key}Input`).value = value;
+                document.getElementById(`${key}Value`).textContent = value;
+                ninePatch[key] = value;
+            });
+            
+            if (currentImage) {
+                renderGuideLines();
+                renderNinePatchGrid();
+                renderStretchPreview();
+            }
+        }
+
+        function renderGuideLines() {
+            if (!currentImage) return;
+
+            const container = document.getElementById('guideLinesContainer');
+            container.innerHTML = '';
+
+            const img = document.getElementById('mainImage');
+            const rect = img.getBoundingClientRect();
+            const scaleX = rect.width / currentImage.width;
+            const scaleY = rect.height / currentImage.height;
+
+            const w = currentImage.width;
+            const h = currentImage.height;
+            const left = ninePatch.left;
+            const right = ninePatch.right;
+            const top = ninePatch.top;
+            const bottom = ninePatch.bottom;
+
+            const lines = [
+                { type: 'vertical', pos: left, name: 'left' },
+                { type: 'vertical', pos: w - right, name: 'right' },
+                { type: 'horizontal', pos: top, name: 'top' },
+                { type: 'horizontal', pos: h - bottom, name: 'bottom' }
+            ];
+
+            lines.forEach(line => {
+                const div = document.createElement('div');
+                div.className = 'guide-line ' + (line.type === 'vertical' ? 'guide-line-vertical' : 'guide-line-horizontal');
+                div.dataset.lineName = line.name;
+                div.dataset.lineType = line.type;
+                
+                if (line.type === 'vertical') {
+                    div.style.left = (line.pos * scaleX) + 'px';
+                } else {
+                    div.style.top = (line.pos * scaleY) + 'px';
+                }
+                
+                const handle = document.createElement('div');
+                handle.className = 'guide-line-handle';
+                div.appendChild(handle);
+
+                div.addEventListener('mousedown', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    startGuideLineDrag(e, line, scaleX, scaleY);
+                });
+                
+                handle.addEventListener('mousedown', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    startGuideLineDrag(e, line, scaleX, scaleY);
+                });
+
+                container.appendChild(div);
+            });
+        }
+
+        function startGuideLineDrag(e, line, scaleX, scaleY) {
+            isDraggingGuide = true;
+            dragGuideName = line.name;
+            dragStartX = e.clientX;
+            dragStartY = e.clientY;
+            dragStartPos = line.type === 'vertical' ? ninePatch[line.name] : ninePatch[line.name];
+
+            document.addEventListener('mousemove', onGuideLineDrag);
+            document.addEventListener('mouseup', stopGuideLineDrag);
+        }
+
+        function onGuideLineDrag(e) {
+            if (!isDraggingGuide || !currentImage) return;
+
+            const img = document.getElementById('mainImage');
+            const rect = img.getBoundingClientRect();
+            const scaleX = rect.width / currentImage.width;
+            const scaleY = rect.height / currentImage.height;
+
+            let newValue;
+            if (dragGuideName === 'left' || dragGuideName === 'right') {
+                const dx = (e.clientX - dragStartX) / scaleX;
+                newValue = Math.round(dragStartPos + dx);
+            } else {
+                const dy = (e.clientY - dragStartY) / scaleY;
+                newValue = Math.round(dragStartPos + dy);
+            }
+
+            const maxMargin = Math.floor(Math.min(currentImage.width, currentImage.height) / 2);
+            newValue = Math.max(0, Math.min(newValue, maxMargin));
+
+            ninePatch[dragGuideName] = newValue;
+            
+            document.getElementById(`${dragGuideName}Slider`).value = newValue;
+            document.getElementById(`${dragGuideName}Input`).value = newValue;
+            document.getElementById(`${dragGuideName}Value`).textContent = newValue;
+
+            renderGuideLines();
+            renderNinePatchGrid();
+            renderStretchPreview();
+        }
+
+        function stopGuideLineDrag() {
+            isDraggingGuide = false;
+            dragGuideName = '';
+            document.removeEventListener('mousemove', onGuideLineDrag);
+            document.removeEventListener('mouseup', stopGuideLineDrag);
+        }
+
+        function renderNinePatchGrid() {
+            if (!currentImage || !currentImageDataUrl) return;
+
+            const grid = document.getElementById('ninePatchGrid');
+            grid.innerHTML = '';
+
+            const img = document.getElementById('mainImage');
+            const w = currentImage.width;
+            const h = currentImage.height;
+            const left = ninePatch.left;
+            const right = ninePatch.right;
+            const top = ninePatch.top;
+            const bottom = ninePatch.bottom;
+
+            const regions = [
+                { name: 'TL', x: 0, y: 0, w: left, h: top, type: 'corner' },
+                { name: 'T', x: left, y: 0, w: w - left - right, h: top, type: 'edge' },
+                { name: 'TR', x: w - right, y: 0, w: right, h: top, type: 'corner' },
+                { name: 'L', x: 0, y: top, w: left, h: h - top - bottom, type: 'edge' },
+                { name: 'C', x: left, y: top, w: w - left - right, h: h - top - bottom, type: 'center' },
+                { name: 'R', x: w - right, y: top, w: right, h: h - top - bottom, type: 'edge' },
+                { name: 'BL', x: 0, y: h - bottom, w: left, h: bottom, type: 'corner' },
+                { name: 'B', x: left, y: h - bottom, w: w - left - right, h: bottom, type: 'edge' },
+                { name: 'BR', x: w - right, y: h - bottom, w: right, h: bottom, type: 'corner' }
+            ];
+
+            regions.forEach(region => {
+                const cell = document.createElement('div');
+                cell.className = `nine-patch-cell ${region.type}`;
+                
+                if (region.w > 0 && region.h > 0) {
+                    const canvas = document.createElement('canvas');
+                    canvas.width = region.w;
+                    canvas.height = region.h;
+                    const ctx = canvas.getContext('2d');
+                    
+                    ctx.drawImage(img, region.x, region.y, region.w, region.h, 0, 0, region.w, region.h);
+                    
+                    const imgEl = document.createElement('img');
+                    imgEl.src = canvas.toDataURL();
+                    cell.appendChild(imgEl);
+                }
+                
+                const label = document.createElement('div');
+                label.className = 'nine-patch-cell-label';
+                label.textContent = region.name;
+                cell.appendChild(label);
+                
+                grid.appendChild(cell);
+            });
+        }
+
+        function renderStretchPreview() {
+            if (!currentImage || !currentImageDataUrl) return;
+
+            const img = document.getElementById('mainImage');
+            const w = currentImage.width;
+            const h = currentImage.height;
+            const left = ninePatch.left;
+            const right = ninePatch.right;
+            const top = ninePatch.top;
+            const bottom = ninePatch.bottom;
+
+            const stretchWidth = 200;
+            const stretchHeight = 100;
+
+            renderStretchedImage('stretchOriginal', w, h);
+            renderStretchedImage('stretchHorizontal', stretchWidth, h);
+            renderStretchedImage('stretchVertical', w, stretchHeight);
+            renderStretchedImage('stretchBoth', stretchWidth, stretchHeight);
+        }
+
+        function renderStretchedImage(elementId, targetW, targetH) {
+            const img = document.getElementById('mainImage');
+            const w = currentImage.width;
+            const h = currentImage.height;
+            const left = ninePatch.left;
+            const right = ninePatch.right;
+            const top = ninePatch.top;
+            const bottom = ninePatch.bottom;
+
+            const canvas = document.createElement('canvas');
+            canvas.width = targetW;
+            canvas.height = targetH;
+            const ctx = canvas.getContext('2d');
+
+            const scaleX = (targetW - left - right) / Math.max(1, w - left - right);
+            const scaleY = (targetH - top - bottom) / Math.max(1, h - top - bottom);
+
+            const regions = [
+                { sx: 0, sy: 0, sw: left, sh: top, dx: 0, dy: 0, dw: left, dh: top },
+                { sx: left, sy: 0, sw: w - left - right, sh: top, dx: left, dy: 0, dw: targetW - left - right, dh: top },
+                { sx: w - right, sy: 0, sw: right, sh: top, dx: targetW - right, dy: 0, dw: right, dh: top },
+                { sx: 0, sy: top, sw: left, sh: h - top - bottom, dx: 0, dy: top, dw: left, dh: targetH - top - bottom },
+                { sx: left, sy: top, sw: w - left - right, sh: h - top - bottom, dx: left, dy: top, dw: targetW - left - right, dh: targetH - top - bottom },
+                { sx: w - right, sy: top, sw: right, sh: h - top - bottom, dx: targetW - right, dy: top, dw: right, dh: targetH - top - bottom },
+                { sx: 0, sy: h - bottom, sw: left, sh: bottom, dx: 0, dy: targetH - bottom, dw: left, dh: bottom },
+                { sx: left, sy: h - bottom, sw: w - left - right, sh: bottom, dx: left, dy: targetH - bottom, dw: targetW - left - right, dh: bottom },
+                { sx: w - right, sy: h - bottom, sw: right, sh: bottom, dx: targetW - right, dy: targetH - bottom, dw: right, dh: bottom }
+            ];
+
+            regions.forEach(region => {
+                if (region.sw > 0 && region.sh > 0) {
+                    ctx.drawImage(img, region.sx, region.sy, region.sw, region.sh, region.dx, region.dy, region.dw, region.dh);
+                }
+            });
+
+            const resultImg = document.getElementById(elementId);
+            resultImg.src = canvas.toDataURL();
+            resultImg.style.width = targetW + 'px';
+            resultImg.style.height = targetH + 'px';
+        }
+
+        function applyNinePatch() {
+            if (!currentImage) {
+                alert('请先上传图片');
+                return;
+            }
+            renderNinePatchGrid();
+            renderStretchPreview();
+            setStatus('九宫格参数已应用', 'success');
+        }
+
+        async function exportNinePatch() {
+            if (!currentImage) {
+                alert('请先上传图片');
+                return;
+            }
+
+            setStatus('导出中...', 'warning');
+
+            try {
+                const response = await fetch('/ninepatch-export', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(ninePatch)
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    setStatus(`导出成功：${data.output_files.length} 个文件`, 'success');
+                    
+                    setTimeout(() => {
+                        window.location.href = '/export';
+                    }, 1500);
+                } else {
+                    const errData = await response.json();
+                    setStatus(`导出失败：${errData.error}`, 'error');
+                }
+            } catch (error) {
+                setStatus('导出失败', 'error');
+            }
+        }
+
+        function setStatus(text, type = 'info') {
+            document.getElementById('statusText').textContent = text;
+            const statusDot = document.getElementById('statusDot');
+            
+            if (type === 'success') {
+                statusDot.style.background = '#2ecc71';
+            } else if (type === 'error') {
+                statusDot.style.background = '#e74c3c';
+            } else if (type === 'warning') {
+                statusDot.style.background = '#f39c12';
+            } else {
+                statusDot.style.background = '#2ecc71';
+            }
+        }
+    </script>
+</body>
+</html>
