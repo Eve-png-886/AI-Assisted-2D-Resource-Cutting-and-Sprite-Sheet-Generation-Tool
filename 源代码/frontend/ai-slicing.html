@@ -1,0 +1,796 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI智能切割 - AI游戏资源切割工具</title>
+    <style>
+        :root {
+            --bg-primary: #1a1a2e;
+            --bg-secondary: #16213e;
+            --bg-tertiary: #0f0f23;
+            --text-primary: #e8e8e8;
+            --text-muted: #a0a0b0;
+            --accent-blue: #4a9eff;
+            --accent-green: #2ecc71;
+            --accent-purple: #9b59b6;
+            --border-color: #2a2a4a;
+            --card-bg: #1e1e3a;
+            --btn-hover: #2a2a5a;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .header {
+            background: var(--bg-secondary);
+            padding: 12px 24px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .logo {
+            font-size: 20px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo-icon {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+
+        .nav-menu {
+            display: flex;
+            gap: 8px;
+        }
+
+        .nav-item {
+            padding: 8px 16px;
+            border-radius: 6px;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+
+        .nav-item:hover {
+            background: var(--btn-hover);
+            color: var(--text-primary);
+        }
+
+        .nav-item.active {
+            background: var(--accent-blue);
+            color: white;
+        }
+
+        .content {
+            flex: 1;
+            display: flex;
+            overflow: hidden;
+        }
+
+        .sidebar {
+            width: 320px;
+            background: var(--bg-secondary);
+            border-right: 1px solid var(--border-color);
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .main-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .panel {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .panel-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 12px 16px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent-blue), #6b7fff);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(74, 158, 255, 0.4);
+        }
+
+        .btn-green {
+            background: linear-gradient(135deg, var(--accent-green), #27ae60);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-secondary:hover {
+            background: var(--btn-hover);
+        }
+
+        .input-group {
+            margin-bottom: 14px;
+        }
+
+        .input-label {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+            display: block;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            -webkit-appearance: none;
+            height: 6px;
+            border-radius: 3px;
+            background: var(--bg-tertiary);
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: var(--accent-blue);
+            cursor: pointer;
+        }
+
+        input[type="number"], select {
+            width: 100%;
+            padding: 10px 12px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            color: var(--text-primary);
+            font-size: 14px;
+        }
+
+        .compare-container {
+            flex: 1;
+            display: flex;
+            padding: 20px;
+            gap: 20px;
+            overflow: hidden;
+        }
+
+        .compare-panel {
+            flex: 1;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .compare-header {
+            padding: 12px 16px;
+            background: var(--bg-tertiary);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .compare-title {
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .compare-canvas {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: auto;
+            background: linear-gradient(45deg, #2a2a4a 25%, transparent 25%, transparent 75%, #2a2a4a 75%, #2a2a4a), 
+                        linear-gradient(45deg, #2a2a4a 25%, transparent 25%, transparent 75%, #2a2a4a 75%, #2a2a4a);
+            background-size: 20px 20px;
+            background-position: 0 0, 10px 10px;
+        }
+
+        .canvas-image {
+            max-width: 100%;
+            max-height: 100%;
+            display: block;
+            border-radius: 4px;
+        }
+
+        .upload-area {
+            border: 2px dashed var(--border-color);
+            border-radius: 10px;
+            padding: 30px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: var(--card-bg);
+            margin-bottom: 20px;
+        }
+
+        .upload-area:hover, .upload-area.drag-over {
+            border-color: var(--accent-blue);
+            background: var(--btn-hover);
+        }
+
+        .upload-icon {
+            font-size: 36px;
+            margin-bottom: 10px;
+        }
+
+        .info-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 14px;
+            margin-bottom: 14px;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 13px;
+        }
+
+        .info-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .info-label {
+            color: var(--text-muted);
+        }
+
+        .info-value {
+            font-weight: 500;
+        }
+
+        .badge {
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .badge-blue {
+            background: var(--accent-blue);
+            color: white;
+        }
+
+        .badge-green {
+            background: var(--accent-green);
+            color: white;
+        }
+
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 12px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: 600;
+            color: var(--accent-blue);
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        .status-bar {
+            background: var(--bg-secondary);
+            border-top: 1px solid var(--border-color);
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 13px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--accent-green);
+            display: inline-block;
+            margin-right: 8px;
+        }
+
+        .cut-box {
+            position: absolute;
+            border: 2px solid var(--accent-green);
+            background: rgba(46, 204, 113, 0.1);
+            pointer-events: none;
+            border-radius: 4px;
+        }
+
+        .cut-box .label {
+            position: absolute;
+            top: -22px;
+            left: -2px;
+            background: var(--accent-green);
+            color: white;
+            padding: 2px 8px;
+            font-size: 10px;
+            font-weight: 600;
+            border-radius: 3px;
+            white-space: nowrap;
+        }
+
+        .canvas-wrapper {
+            position: relative;
+        }
+
+        .threshold-preview {
+            width: 100%;
+            height: 80px;
+            background: var(--bg-tertiary);
+            border-radius: 6px;
+            margin-top: 8px;
+            border: 1px solid var(--border-color);
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="logo">
+            <div class="logo-icon">🎮</div>
+            <span>AI游戏资源切割工具</span>
+        </div>
+        <nav class="nav-menu">
+            <a href="/" class="nav-item">🏠 工作台</a>
+            <a href="/ai-slicing" class="nav-item active">🤖 AI切割</a>
+            <a href="/spritesheet" class="nav-item">📦 精灵图</a>
+            <a href="/nine-patch" class="nav-item">📐 九宫格</a>
+            <a href="/animation" class="nav-item">🎬 动画生成</a>
+            <a href="/export" class="nav-item">📤 导出</a>
+        </nav>
+    </header>
+
+    <div class="content">
+        <aside class="sidebar">
+            <div class="panel">
+                <div class="panel-title">📁 上传图片</div>
+                <div class="upload-area" id="uploadArea" onclick="document.getElementById('fileInput').click()">
+                    <input type="file" id="fileInput" accept="image/*" style="display: none;" onchange="handleFileSelect(event)">
+                    <div class="upload-icon">📤</div>
+                    <div style="font-size: 14px;">点击或拖拽上传</div>
+                    <div style="font-size: 12px; color: var(--text-muted); margin-top: 6px;">PNG, JPG, WebP</div>
+                </div>
+            </div>
+
+            <div class="panel" id="detectionPanel" style="display: none;">
+                <div class="panel-title">⚙️ 检测参数</div>
+                
+                <div class="input-group">
+                    <label class="input-label">检测模式</label>
+                    <select id="detectionMode">
+                        <option value="external">外部轮廓</option>
+                        <option value="hierarchical">层级轮廓</option>
+                    </select>
+                </div>
+
+                <div class="input-group">
+                    <label class="input-label">最小面积阈值: <span id="minAreaValue" style="color: var(--accent-blue); font-weight: 600;">50</span> px²</label>
+                    <input type="range" id="minAreaSlider" min="10" max="500" value="50" oninput="updateMinArea()">
+                </div>
+
+                <div class="input-group">
+                    <label class="input-label">二值化阈值: <span id="binaryThresholdValue" style="color: var(--accent-blue); font-weight: 600;">245</span></label>
+                    <input type="range" id="binaryThresholdSlider" min="0" max="255" value="245" oninput="updateBinaryThreshold()">
+                    <canvas class="threshold-preview" id="thresholdPreview"></canvas>
+                </div>
+
+                <div class="input-group">
+                    <label class="input-label">轮廓近似: <span id="approximationValue" style="color: var(--accent-blue); font-weight: 600;">SIMPLE</span></label>
+                    <select id="approximationSelect">
+                        <option value="simple">CHAIN_APPROX_SIMPLE</option>
+                        <option value="none">CHAIN_APPROX_NONE</option>
+                    </select>
+                </div>
+
+                <button class="btn btn-primary" onclick="runDetection()" style="margin-bottom: 8px;">
+                    <span>🔍</span> 手动检测
+                </button>
+                <button class="btn btn-green" onclick="runAutoDetection()">
+                    <span>🤖</span> AI智能检测
+                </button>
+                <div style="height: 8px;"></div>
+                <button class="btn btn-secondary" onclick="goToSpritesheet()">
+                    <span>📦</span> 前往精灵图生成
+                </button>
+            </div>
+
+            <div class="panel" id="statsPanel" style="display: none;">
+                <div class="panel-title">📊 检测统计</div>
+                <div class="stats-container">
+                    <div class="stat-card">
+                        <div class="stat-value" id="objectCount">0</div>
+                        <div class="stat-label">检测对象</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="avgArea">0</div>
+                        <div class="stat-label">平均面积</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="processTime">0</div>
+                        <div class="stat-label">耗时(ms)</div>
+                    </div>
+                </div>
+                <div class="info-card">
+                    <div class="info-row">
+                        <span class="info-label">检测方法</span>
+                        <span class="info-value" id="detectionMethod">-</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">优化参数</span>
+                        <span class="info-value" id="optimizedParams">-</span>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <section class="main-area">
+            <div class="compare-container">
+                <div class="compare-panel">
+                    <div class="compare-header">
+                        <span class="compare-title">🖼️ 原始图片</span>
+                        <span class="badge badge-blue" id="originalSize"></span>
+                    </div>
+                    <div class="compare-canvas">
+                        <div class="canvas-wrapper" id="originalCanvas">
+                            <img class="canvas-image" id="originalImage" style="display: none;">
+                        </div>
+                        <div id="originalPlaceholder" style="text-align: center; color: var(--text-muted);">
+                            <div style="font-size: 48px; margin-bottom: 16px;">🖼️</div>
+                            <div>等待上传图片</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="compare-panel">
+                    <div class="compare-header">
+                        <span class="compare-title">🤖 AI检测结果</span>
+                        <span class="badge badge-green" id="detectedCount" style="display: none;">0</span>
+                    </div>
+                    <div class="compare-canvas">
+                        <div class="canvas-wrapper" id="resultCanvas" style="position: relative;">
+                            <img class="canvas-image" id="resultImage" style="display: none;">
+                            <div id="boxesOverlay"></div>
+                        </div>
+                        <div id="resultPlaceholder" style="text-align: center; color: var(--text-muted);">
+                            <div style="font-size: 48px; margin-bottom: 16px;">🔍</div>
+                            <div>运行AI检测查看结果</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <footer class="status-bar">
+        <div><span class="status-dot" id="statusDot"></span><span id="statusText">准备就绪</span></div>
+        <div style="color: var(--text-muted);">OpenCV AI检测 · 实时参数调整</div>
+    </footer>
+
+    <script>
+        let currentImage = null;
+        let currentImageDataUrl = null;
+        let boxes = [];
+
+        const uploadArea = document.getElementById('uploadArea');
+
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('drag-over');
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('drag-over');
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('drag-over');
+            if (e.dataTransfer.files.length) {
+                handleFileSelect({ target: { files: e.dataTransfer.files } });
+            }
+        });
+
+        async function handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            setStatus('上传中...', 'warning');
+
+            try {
+                const response = await fetch('/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    currentImage = data;
+
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        currentImageDataUrl = e.target.result;
+                        
+                        const img = document.getElementById('originalImage');
+                        const resultImg = document.getElementById('resultImage');
+                        img.src = currentImageDataUrl;
+                        resultImg.src = currentImageDataUrl;
+                        
+                        img.onload = () => {
+                            document.getElementById('originalPlaceholder').style.display = 'none';
+                            document.getElementById('resultPlaceholder').style.display = 'none';
+                            img.style.display = 'block';
+                            resultImg.style.display = 'block';
+                            
+                            document.getElementById('originalSize').textContent = `${data.width}×${data.height}`;
+                            document.getElementById('originalSize').style.display = 'inline-block';
+                            document.getElementById('detectionPanel').style.display = 'block';
+                            
+                            setStatus('上传成功', 'success');
+                            drawThresholdPreview();
+                        };
+                    };
+                    reader.readAsDataURL(file);
+                } else {
+                    setStatus('上传失败', 'error');
+                }
+            } catch (error) {
+                setStatus('上传失败', 'error');
+            }
+        }
+
+        function updateMinArea() {
+            document.getElementById('minAreaValue').textContent = document.getElementById('minAreaSlider').value;
+        }
+
+        function updateBinaryThreshold() {
+            document.getElementById('binaryThresholdValue').textContent = document.getElementById('binaryThresholdSlider').value;
+            drawThresholdPreview();
+        }
+
+        function drawThresholdPreview() {
+            const canvas = document.getElementById('thresholdPreview');
+            const ctx = canvas.getContext('2d');
+            const threshold = parseInt(document.getElementById('binaryThresholdSlider').value);
+            
+            const gradient = ctx.createLinearGradient(0, 0, canvas.width, 0);
+            gradient.addColorStop(0, '#000');
+            for (let i = 0; i <= 255; i++) {
+                const ratio = i / 255;
+                gradient.addColorStop(i / 255, i >= threshold ? '#fff' : '#000');
+            }
+            gradient.addColorStop(1, '#fff');
+            
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            const lineX = (threshold / 255) * canvas.width;
+            ctx.strokeStyle = '#ff6666';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(lineX, 0);
+            ctx.lineTo(lineX, canvas.height);
+            ctx.stroke();
+            
+            ctx.fillStyle = '#ff6666';
+            ctx.font = '10px Arial';
+            ctx.fillText(threshold, lineX + 4, 14);
+        }
+
+        async function runDetection() {
+            if (!currentImage) {
+                alert('请先上传图片');
+                return;
+            }
+
+            setStatus('手动检测中...', 'warning');
+            const startTime = performance.now();
+
+            try {
+                const minArea = parseInt(document.getElementById('minAreaSlider').value);
+                const mode = document.getElementById('detectionMode').value;
+
+                const response = await fetch('/detect', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ min_area: minArea, mode: mode })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    boxes = data.boxes;
+                    renderBoxes();
+                    updateStats(startTime, data);
+                    setStatus(`手动检测完成：${boxes.length} 个对象`, 'success');
+                } else {
+                    const errData = await response.json();
+                    setStatus(`检测失败：${errData.error}`, 'error');
+                }
+            } catch (error) {
+                setStatus('检测失败', 'error');
+            }
+        }
+
+        async function runAutoDetection() {
+            if (!currentImage) {
+                alert('请先上传图片');
+                return;
+            }
+
+            setStatus('AI智能检测中...', 'warning');
+            const startTime = performance.now();
+
+            try {
+                const response = await fetch('/auto-detect', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({})
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    boxes = data.boxes;
+                    renderBoxes();
+                    updateStats(startTime, data);
+                    
+                    if (data.params) {
+                        document.getElementById('minAreaSlider').value = data.params.min_area;
+                        updateMinArea();
+                        document.getElementById('detectionMode').value = data.params.mode;
+                    }
+                    
+                    setStatus('AI自动检测完成', 'success');
+                } else {
+                    const errData = await response.json();
+                    setStatus(`检测失败：${errData.error}`, 'error');
+                }
+            } catch (error) {
+                setStatus('检测失败', 'error');
+            }
+        }
+
+        function renderBoxes() {
+            const overlay = document.getElementById('boxesOverlay');
+            overlay.innerHTML = '';
+
+            if (!currentImageDataUrl) return;
+
+            const img = document.getElementById('resultImage');
+            const rect = img.getBoundingClientRect();
+            const scaleX = rect.width / currentImage.width;
+            const scaleY = rect.height / currentImage.height;
+
+            boxes.forEach((box, index) => {
+                const div = document.createElement('div');
+                div.className = 'cut-box';
+                div.style.left = (box.x * scaleX) + 'px';
+                div.style.top = (box.y * scaleY) + 'px';
+                div.style.width = (box.width * scaleX) + 'px';
+                div.style.height = (box.height * scaleY) + 'px';
+                div.innerHTML = `<div class="label">${index + 1}</div>`;
+                overlay.appendChild(div);
+            });
+
+            const badge = document.getElementById('detectedCount');
+            badge.textContent = boxes.length;
+            badge.style.display = boxes.length > 0 ? 'inline-block' : 'none';
+        }
+
+        function updateStats(startTime, data) {
+            const elapsed = Math.round(performance.now() - startTime);
+            document.getElementById('processTime').textContent = elapsed;
+            document.getElementById('objectCount').textContent = data.count;
+            
+            if (data.boxes && data.boxes.length > 0) {
+                const avgArea = Math.round(data.boxes.reduce((sum, b) => sum + b.area, 0) / data.boxes.length);
+                document.getElementById('avgArea').textContent = avgArea;
+            }
+            
+            document.getElementById('detectionMethod').textContent = data.method || '手动检测';
+            
+            if (data.params) {
+                document.getElementById('optimizedParams').textContent = 
+                    `模式: ${data.params.mode}, 面积: ${data.params.min_area}`;
+            }
+            
+            document.getElementById('statsPanel').style.display = 'block';
+        }
+
+        function setStatus(text, type = 'info') {
+            document.getElementById('statusText').textContent = text;
+            const statusDot = document.getElementById('statusDot');
+            
+            if (type === 'success') {
+                statusDot.style.background = '#2ecc71';
+            } else if (type === 'error') {
+                statusDot.style.background = '#e74c3c';
+            } else if (type === 'warning') {
+                statusDot.style.background = '#f39c12';
+            } else {
+                statusDot.style.background = '#2ecc71';
+            }
+        }
+    </script>
+</body>
+</html>
