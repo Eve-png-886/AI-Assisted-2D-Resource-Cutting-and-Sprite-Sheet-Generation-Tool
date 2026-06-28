@@ -1,0 +1,1520 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI动画生成 - AI游戏资源切割工具</title>
+    <style>
+        :root {
+            --bg-primary: #1a1a2e;
+            --bg-secondary: #16213e;
+            --bg-tertiary: #0f0f23;
+            --text-primary: #e8e8e8;
+            --text-muted: #a0a0b0;
+            --accent-blue: #4a9eff;
+            --accent-green: #2ecc71;
+            --accent-purple: #9b59b6;
+            --accent-orange: #f39c12;
+            --border-color: #2a2a4a;
+            --card-bg: #1e1e3a;
+            --btn-hover: #2a2a5a;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .header {
+            background: var(--bg-secondary);
+            padding: 12px 24px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .logo {
+            font-size: 20px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo-icon {
+            width: 32px; height: 32px;
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+            border-radius: 6px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 18px;
+        }
+
+        .nav-menu { display: flex; gap: 8px; }
+
+        .nav-item {
+            padding: 8px 16px;
+            border-radius: 6px;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+
+        .nav-item:hover { background: var(--btn-hover); color: var(--text-primary); }
+        .nav-item.active { background: var(--accent-blue); color: white; }
+
+        .content { flex: 1; display: flex; overflow: hidden; }
+
+        .sidebar {
+            width: 340px;
+            background: var(--bg-secondary);
+            border-right: 1px solid var(--border-color);
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .main-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            background: var(--bg-tertiary);
+        }
+
+        .panel {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+
+        .panel-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 10px 14px;
+            border: none;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent-blue), #6b7fff);
+            color: white;
+        }
+        .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(74, 158, 255, 0.4); }
+        .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
+
+        .btn-secondary {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+        }
+        .btn-secondary:hover { background: var(--btn-hover); }
+
+        .btn-green {
+            background: linear-gradient(135deg, var(--accent-green), #27ae60);
+            color: white;
+        }
+
+        .input-group { margin-bottom: 12px; }
+        .input-label { font-size: 12px; color: var(--text-muted); margin-bottom: 6px; display: block; }
+
+        input[type="text"], input[type="number"], select, textarea {
+            width: 100%;
+            padding: 8px 10px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            color: var(--text-primary);
+            font-size: 13px;
+        }
+
+        textarea { resize: vertical; min-height: 60px; font-family: inherit; }
+
+        input[type="range"] {
+            width: 100%;
+            accent-color: var(--accent-blue);
+        }
+
+        .preview-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            overflow: auto;
+        }
+
+        .preview-canvas-wrapper {
+            background: linear-gradient(45deg, #2a2a4a 25%, transparent 25%, transparent 75%, #2a2a4a 75%, #2a2a4a),
+                        linear-gradient(45deg, #2a2a4a 25%, transparent 25%, transparent 75%, #2a2a4a 75%, #2a2a4a);
+            background-size: 20px 20px;
+            background-position: 0 0, 10px 10px;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 300px;
+            min-height: 300px;
+        }
+
+        #previewCanvas {
+            max-width: 400px;
+            max-height: 400px;
+            image-rendering: pixelated;
+        }
+
+        .sprite-selector {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            max-height: 180px;
+            overflow-y: auto;
+            padding: 4px;
+        }
+
+        .sprite-thumb {
+            aspect-ratio: 1;
+            background: var(--bg-tertiary);
+            border: 2px solid var(--border-color);
+            border-radius: 6px;
+            cursor: pointer;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .sprite-thumb:hover { border-color: var(--accent-blue); }
+        .sprite-thumb.selected { border-color: var(--accent-green); box-shadow: 0 0 0 2px rgba(46, 204, 113, 0.2); }
+        .sprite-thumb img { max-width: 100%; max-height: 100%; object-fit: contain; }
+
+        .animation-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+        }
+
+        .anim-card {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+        }
+
+        .anim-card:hover { border-color: var(--accent-blue); }
+        .anim-card.selected {
+            border-color: var(--accent-green);
+            background: rgba(46, 204, 113, 0.1);
+        }
+
+        .anim-icon { font-size: 24px; margin-bottom: 4px; }
+        .anim-name { font-size: 12px; font-weight: 600; }
+        .anim-desc { font-size: 10px; color: var(--text-muted); margin-top: 2px; }
+
+        .recommendation-badge {
+            display: inline-block;
+            background: var(--accent-orange);
+            color: white;
+            font-size: 9px;
+            padding: 2px 6px;
+            border-radius: 10px;
+            margin-top: 4px;
+        }
+
+        .controls-bar {
+            background: var(--bg-secondary);
+            border-top: 1px solid var(--border-color);
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .play-btn {
+            width: 40px; height: 40px;
+            border-radius: 50%;
+            background: var(--accent-green);
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+        .play-btn:hover { transform: scale(1.1); }
+
+        .speed-control {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .frame-info {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .export-options {
+            display: flex;
+            gap: 8px;
+            margin-left: auto;
+        }
+
+        .status-bar {
+            background: var(--bg-secondary);
+            border-top: 1px solid var(--border-color);
+            padding: 8px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 12px;
+        }
+
+        .status-dot {
+            width: 8px; height: 8px;
+            border-radius: 50%;
+            background: var(--accent-green);
+            display: inline-block;
+            margin-right: 6px;
+        }
+
+        .loading-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .loading-overlay.show { display: flex; }
+
+        .loading-content {
+            background: var(--bg-secondary);
+            padding: 30px 50px;
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .loading-spinner {
+            width: 40px; height: 40px;
+            border: 3px solid var(--border-color);
+            border-top-color: var(--accent-blue);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 16px;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .slider-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .slider-row input[type="range"] { flex: 1; }
+        .slider-value {
+            font-size: 12px;
+            color: var(--accent-blue);
+            min-width: 36px;
+            text-align: right;
+        }
+
+        .file-upload-area {
+            border: 2px dashed var(--border-color);
+            border-radius: 6px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .file-upload-area:hover {
+            border-color: var(--accent-blue);
+            background: rgba(74, 158, 255, 0.1);
+        }
+
+        .hint-text {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-top: 6px;
+            line-height: 1.4;
+        }
+
+        .mode-tabs {
+            display: flex;
+            gap: 8px;
+        }
+
+        .mode-tab {
+            flex: 1;
+            padding: 12px;
+            background: var(--bg-tertiary);
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .mode-tab:hover {
+            border-color: var(--accent-blue);
+        }
+
+        .mode-tab.active {
+            border-color: var(--accent-blue);
+            background: rgba(74, 158, 255, 0.1);
+        }
+
+        .mode-icon {
+            font-size: 24px;
+        }
+
+        .mode-name {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .mode-desc {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        .btn-row {
+            display: flex;
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .btn-row .btn {
+            flex: 1;
+        }
+
+        .btn-green {
+            background: var(--accent-green);
+            color: white;
+        }
+
+        .btn-green:hover {
+            opacity: 0.9;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 4px;
+            margin-bottom: 12px;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 6px 10px;
+            font-size: 12px;
+            text-align: center;
+            cursor: pointer;
+            border-radius: 4px;
+            color: var(--text-muted);
+            transition: all 0.2s;
+        }
+
+        .tab:hover { background: var(--btn-hover); }
+        .tab.active { background: var(--accent-blue); color: white; }
+
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="logo">
+            <div class="logo-icon">🎮</div>
+            <span>AI游戏资源切割工具</span>
+        </div>
+        <nav class="nav-menu">
+            <a href="/" class="nav-item">🏠 工作台</a>
+            <a href="/ai-slicing" class="nav-item">🤖 AI切割</a>
+            <a href="/spritesheet" class="nav-item">📦 精灵图</a>
+            <a href="/nine-patch" class="nav-item">📐 九宫格</a>
+            <a href="/animation" class="nav-item active">🎬 动画生成</a>
+            <a href="/export" class="nav-item">📤 导出</a>
+        </nav>
+    </header>
+
+    <div class="content">
+        <aside class="sidebar">
+            <div class="panel">
+                <div class="panel-title">🖼️ 选择精灵图</div>
+                <div class="sprite-selector" id="spriteSelector">
+                    <div class="file-upload-area" onclick="document.getElementById('spriteUpload').click()">
+                        <div style="font-size: 24px; margin-bottom: 4px;">📁</div>
+                        点击上传图片
+                    </div>
+                </div>
+                <input type="file" id="spriteUpload" accept="image/*" style="display: none;" onchange="uploadSprite(event)">
+                <div class="hint-text">💡 从已有的切割图中选择，或上传新图片</div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-title">🤖 AI生成方式</div>
+                <div class="tabs">
+                    <div class="tab active" onclick="switchTab('auto')">AI推荐</div>
+                    <div class="tab" onclick="switchTab('prompt')">提示词</div>
+                    <div class="tab" onclick="switchTab('manual')">手动选择</div>
+                </div>
+
+                <div id="tab-auto" class="tab-content active">
+                    <button class="btn btn-secondary" onclick="analyzeSprite()" id="analyzeBtn">
+                        <span>🔍</span> AI分析推荐
+                    </button>
+                    <div class="hint-text">AI将自动分析图片特征，推荐最适合的动画类型</div>
+                    <div id="analysisResult" style="margin-top: 12px;"></div>
+                </div>
+
+                <div id="tab-prompt" class="tab-content">
+                    <div class="input-group">
+                        <label class="input-label">描述你想要的动画效果</label>
+                        <textarea id="promptInput" placeholder="例如：角色上下弹跳，带有轻微的旋转效果..."></textarea>
+                    </div>
+                    <button class="btn btn-secondary" onclick="generateFromPrompt()">
+                        <span>✨</span> 根据提示生成
+                    </button>
+                    <div class="hint-text">输入自然语言描述，AI会匹配合适的动画效果</div>
+                </div>
+
+                <div id="tab-manual" class="tab-content">
+                    <div class="animation-grid" id="animationGrid"></div>
+                </div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-title">🎯 生成模式</div>
+                <div class="mode-tabs">
+                    <div class="mode-tab active" data-mode="local" onclick="switchMode('local')">
+                        <div class="mode-icon">⚡</div>
+                        <div class="mode-text">
+                            <div class="mode-name">本地变换</div>
+                            <div class="mode-desc">免费，无需API</div>
+                        </div>
+                    </div>
+                    <div class="mode-tab" data-mode="ai" onclick="switchMode('ai')">
+                        <div class="mode-icon">🤖</div>
+                        <div class="mode-text">
+                            <div class="mode-name">AI生成</div>
+                            <div class="mode-desc">真实AI生成</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel" id="aiConfigPanel" style="display: none;">
+                <div class="panel-title">🔑 AI配置</div>
+                <div class="input-group">
+                    <label class="input-label">API供应商</label>
+                    <select id="aiProvider" onchange="onProviderChange()">
+                        <option value="siliconflow">硅基流动 (SiliconFlow)</option>
+                        <option value="openai">OpenAI</option>
+                        <option value="custom">自定义</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label class="input-label">API地址</label>
+                    <input type="text" id="aiBaseUrl" placeholder="https://api.siliconflow.cn/v1" value="https://api.siliconflow.cn/v1">
+                </div>
+                <div class="input-group">
+                    <label class="input-label">API Key</label>
+                    <input type="password" id="aiApiKey" placeholder="输入你的API Key">
+                </div>
+                <div class="input-group">
+                    <label class="input-label">图像生成模型</label>
+                    <input type="text" id="aiImageModel" value="black-forest-labs/FLUX.1-schnell">
+                </div>
+                <div class="btn-row">
+                    <button class="btn btn-secondary" onclick="testAiConnection()" id="testConnBtn">
+                        <span>🔍</span> 测试连接
+                    </button>
+                    <button class="btn btn-secondary" onclick="saveAiConfig()">
+                        <span>💾</span> 保存配置
+                    </button>
+                </div>
+                <div class="hint-text" id="configStatus">未配置API Key将使用本地变换模式</div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-title">⚙️ 参数设置</div>
+                <div class="input-group">
+                    <label class="input-label">帧数</label>
+                    <div class="slider-row">
+                        <input type="range" id="frameCount" min="4" max="24" value="8" oninput="updateFrameValue()">
+                        <span class="slider-value" id="frameValue">8</span>
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label class="input-label">动画强度</label>
+                    <div class="slider-row">
+                        <input type="range" id="animIntensity" min="1" max="200" value="100" oninput="updateIntensityValue()">
+                        <span class="slider-value" id="intensityValue">100%</span>
+                    </div>
+                </div>
+            </div>
+
+            <button class="btn btn-primary" onclick="generateAnimation()" id="generateBtn">
+                <span>🎬</span> 生成动画
+            </button>
+        </aside>
+
+        <section class="main-area">
+            <div class="preview-container">
+                <div class="preview-canvas-wrapper">
+                    <canvas id="previewCanvas" width="200" height="200"></canvas>
+                </div>
+            </div>
+
+            <div class="controls-bar">
+                <button class="play-btn" onclick="togglePlay()" id="playBtn">▶️</button>
+                <div class="speed-control">
+                    <span>速度:</span>
+                    <input type="range" min="1" max="30" value="10" style="width: 100px;" oninput="updateSpeed(this.value)">
+                    <span id="speedValue">10fps</span>
+                </div>
+                <div class="frame-info" id="frameInfo">暂无帧</div>
+                <div class="export-options">
+                    <button class="btn btn-secondary" style="width: auto;" onclick="exportFrames()">📥 序列帧</button>
+                    <button class="btn btn-secondary" style="width: auto;" onclick="exportSpritesheet()">📦 精灵图</button>
+                    <button class="btn btn-green" style="width: auto;" onclick="exportGIF()">🎞️ GIF动图</button>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <footer class="status-bar">
+        <div><span class="status-dot" id="statusDot"></span><span id="statusText">准备就绪</span></div>
+        <div style="color: var(--text-muted);">AI动画生成 · 一键导出</div>
+    </footer>
+
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-content">
+            <div class="loading-spinner"></div>
+            <div id="loadingText">生成中...</div>
+        </div>
+    </div>
+
+    <script>
+        let selectedSprite = null;
+        let selectedAnimation = 'breath';
+        let animationFrames = [];
+        let currentFrame = 0;
+        let isPlaying = false;
+        let playInterval = null;
+        let fps = 10;
+        let spriteList = [];
+
+        const ANIMATION_TYPES = {
+            bounce: { name: '弹跳', icon: '⬆️', desc: '上下弹跳' },
+            breath: { name: '呼吸', icon: '💨', desc: '缓慢缩放' },
+            shake: { name: '抖动', icon: '📳', desc: '左右摇晃' },
+            rotate: { name: '旋转', icon: '🔄', desc: '旋转效果' },
+            flash: { name: '闪烁', icon: '✨', desc: '透明度变化' },
+            sway: { name: '摇摆', icon: '🌿', desc: '左右摆动' },
+            walk: { name: '走路', icon: '🚶', desc: '走路摆动' },
+            zoom: { name: '脉冲', icon: '💫', desc: '脉冲放大' },
+            float: { name: '漂浮', icon: '👻', desc: '上下漂浮' },
+            squash: { name: '挤压', icon: '🎾', desc: '挤压拉伸' }
+        };
+
+        function init() {
+            loadSpriteList();
+            renderAnimationGrid();
+        }
+
+        async function loadSpriteList() {
+            try {
+                const response = await fetch('/get-outputs');
+                if (response.ok) {
+                    const data = await response.json();
+                    spriteList = data.files.filter(f => f.endsWith('.png') && !f.startsWith('anim_'));
+                    renderSpriteSelector();
+                }
+            } catch (e) {
+                console.error('Failed to load sprites:', e);
+            }
+        }
+
+        function renderSpriteSelector() {
+            const selector = document.getElementById('spriteSelector');
+            let html = '';
+
+            if (spriteList.length === 0) {
+                html = `<div class="file-upload-area" onclick="document.getElementById('spriteUpload').click()">
+                    <div style="font-size: 24px; margin-bottom: 4px;">📁</div>
+                    暂无图片，点击上传
+                </div>`;
+            } else {
+                spriteList.slice(0, 12).forEach(sprite => {
+                    const isSelected = selectedSprite === sprite;
+                    html += `<div class="sprite-thumb ${isSelected ? 'selected' : ''}" onclick="selectSprite('${sprite}')">
+                        <img src="/preview/${sprite}?t=${Date.now()}" alt="${sprite}">
+                    </div>`;
+                });
+            }
+
+            selector.innerHTML = html;
+        }
+
+        function selectSprite(filename) {
+            selectedSprite = filename;
+            renderSpriteSelector();
+            loadPreviewImage(filename);
+            setStatus(`已选择: ${filename}`, 'info');
+        }
+
+        function loadPreviewImage(filename) {
+            const img = new Image();
+            img.onload = () => {
+                const canvas = document.getElementById('previewCanvas');
+                const ctx = canvas.getContext('2d');
+                const size = Math.max(img.width, img.height) + 60;
+                canvas.width = size;
+                canvas.height = size;
+                ctx.clearRect(0, 0, size, size);
+                ctx.drawImage(img, (size - img.width) / 2, (size - img.height) / 2);
+                animationFrames = [];
+                currentFrame = 0;
+                updateFrameInfo();
+            };
+            img.src = `/preview/${filename}?t=${Date.now()}`;
+        }
+
+        async function uploadSprite(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            showLoading('上传中...');
+            try {
+                const response = await fetch('/upload', { method: 'POST', body: formData });
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.filename) {
+                        spriteList.unshift(data.filename);
+                        selectSprite(data.filename);
+                        renderSpriteSelector();
+                    }
+                }
+            } catch (e) {
+                setStatus('上传失败', 'error');
+            }
+            hideLoading();
+        }
+
+        function renderAnimationGrid() {
+            const grid = document.getElementById('animationGrid');
+            grid.innerHTML = Object.entries(ANIMATION_TYPES).map(([key, anim]) => `
+                <div class="anim-card ${selectedAnimation === key ? 'selected' : ''}" onclick="selectAnimation('${key}')">
+                    <div class="anim-icon">${anim.icon}</div>
+                    <div class="anim-name">${anim.name}</div>
+                    <div class="anim-desc">${anim.desc}</div>
+                </div>
+            `).join('');
+        }
+
+        function selectAnimation(type) {
+            selectedAnimation = type;
+            renderAnimationGrid();
+        }
+
+        function switchTab(tab) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.querySelector(`.tab[onclick="switchTab('${tab}')"]`).classList.add('active');
+            document.getElementById(`tab-${tab}`).classList.add('active');
+        }
+
+        async function analyzeSprite() {
+            if (!selectedSprite) {
+                alert('请先选择一张精灵图');
+                return;
+            }
+
+            showLoading('AI分析中...');
+            try {
+                const response = await fetch('/api/analyze-sprite', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ filename: selectedSprite })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    showAnalysisResult(data);
+                    setStatus('分析完成', 'success');
+                } else {
+                    setStatus('分析失败', 'error');
+                }
+            } catch (e) {
+                setStatus('分析失败', 'error');
+            }
+            hideLoading();
+        }
+
+        function showAnalysisResult(data) {
+            const resultDiv = document.getElementById('analysisResult');
+            let html = `<div style="font-size: 11px; color: var(--text-muted); margin-bottom: 8px;">
+                尺寸: ${data.analysis.width}×${data.analysis.height} | 
+                宽高比: ${data.analysis.aspect_ratio}
+            </div>`;
+
+            html += '<div style="display: flex; flex-direction: column; gap: 6px;">';
+            data.recommendations.forEach(rec => {
+                const anim = ANIMATION_TYPES[rec.type];
+                html += `
+                    <div class="anim-card" style="padding: 8px; text-align: left; display: flex; align-items: center; gap: 10px;"
+                         onclick="applyRecommendation('${rec.type}')">
+                        <div style="font-size: 20px;">${anim.icon}</div>
+                        <div style="flex: 1;">
+                            <div style="font-size: 12px; font-weight: 600;">${anim.name}
+                                <span class="recommendation-badge">${Math.round(rec.confidence * 100)}% 匹配</span>
+                            </div>
+                            <div style="font-size: 10px; color: var(--text-muted);">${rec.reason}</div>
+                        </div>
+                    </div>
+                `;
+            });
+            html += '</div>';
+
+            resultDiv.innerHTML = html;
+        }
+
+        function applyRecommendation(type) {
+            selectedAnimation = type;
+            renderAnimationGrid();
+            switchTab('manual');
+            setStatus(`已选择: ${ANIMATION_TYPES[type].name}`, 'info');
+        }
+
+        async function generateFromPrompt() {
+            const prompt = document.getElementById('promptInput').value.trim();
+            if (!prompt) {
+                alert('请输入动画描述');
+                return;
+            }
+            if (!selectedSprite) {
+                alert('请先选择一张精灵图');
+                return;
+            }
+
+            // 简单的关键词匹配
+            const lowerPrompt = prompt.toLowerCase();
+            let matchedType = 'breath';
+
+            if (lowerPrompt.includes('跳') || lowerPrompt.includes('弹') || lowerPrompt.includes('bounce')) {
+                matchedType = 'bounce';
+            } else if (lowerPrompt.includes('呼吸') || lowerPrompt.includes('待机') || lowerPrompt.includes('缩放')) {
+                matchedType = 'breath';
+            } else if (lowerPrompt.includes('抖') || lowerPrompt.includes('震') || lowerPrompt.includes('shake')) {
+                matchedType = 'shake';
+            } else if (lowerPrompt.includes('旋转') || lowerPrompt.includes('转') || lowerPrompt.includes('rotate')) {
+                matchedType = 'rotate';
+            } else if (lowerPrompt.includes('闪') || lowerPrompt.includes('透明') || lowerPrompt.includes('flash')) {
+                matchedType = 'flash';
+            } else if (lowerPrompt.includes('摇') || lowerPrompt.includes('摆') || lowerPrompt.includes('sway')) {
+                matchedType = 'sway';
+            } else if (lowerPrompt.includes('走') || lowerPrompt.includes('walk') || lowerPrompt.includes('跑')) {
+                matchedType = 'walk';
+            } else if (lowerPrompt.includes('脉冲') || lowerPrompt.includes('放大') || lowerPrompt.includes('zoom')) {
+                matchedType = 'zoom';
+            } else if (lowerPrompt.includes('飘') || lowerPrompt.includes('飞') || lowerPrompt.includes('float')) {
+                matchedType = 'float';
+            } else if (lowerPrompt.includes('挤') || lowerPrompt.includes('压') || lowerPrompt.includes('squash')) {
+                matchedType = 'squash';
+            }
+
+            selectedAnimation = matchedType;
+            renderAnimationGrid();
+            switchTab('manual');
+
+            setStatus(`匹配到: ${ANIMATION_TYPES[matchedType].name}，正在生成...`, 'info');
+            await generateAnimation();
+        }
+
+        let currentMode = 'local';
+
+        function switchMode(mode) {
+            currentMode = mode;
+            document.querySelectorAll('.mode-tab').forEach(tab => {
+                tab.classList.toggle('active', tab.dataset.mode === mode);
+            });
+            document.getElementById('aiConfigPanel').style.display = mode === 'ai' ? 'block' : 'none';
+            
+            if (mode === 'ai') {
+                loadAiConfig();
+            }
+        }
+
+        function onProviderChange() {
+            const provider = document.getElementById('aiProvider').value;
+            const baseUrlInput = document.getElementById('aiBaseUrl');
+            const modelInput = document.getElementById('aiImageModel');
+            
+            if (provider === 'siliconflow') {
+                baseUrlInput.value = 'https://api.siliconflow.cn/v1';
+                modelInput.value = 'black-forest-labs/FLUX.1-schnell';
+            } else if (provider === 'openai') {
+                baseUrlInput.value = 'https://api.openai.com/v1';
+                modelInput.value = 'dall-e-3';
+            }
+        }
+
+        async function loadAiConfig() {
+            try {
+                const response = await fetch('/api/get-ai-config');
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.success && data.config) {
+                        const cfg = data.config;
+                        if (cfg.provider) document.getElementById('aiProvider').value = cfg.provider;
+                        if (cfg.base_url) document.getElementById('aiBaseUrl').value = cfg.base_url;
+                        if (cfg.image_model) document.getElementById('aiImageModel').value = cfg.image_model;
+                        if (cfg.api_key && cfg.api_key !== '***') {
+                            document.getElementById('configStatus').textContent = 'API Key已配置';
+                            document.getElementById('configStatus').style.color = 'var(--accent-green)';
+                        }
+                    }
+                }
+            } catch (e) {
+                console.error('加载配置失败', e);
+            }
+        }
+
+        async function saveAiConfig() {
+            const provider = document.getElementById('aiProvider').value;
+            const baseUrl = document.getElementById('aiBaseUrl').value.trim();
+            const apiKey = document.getElementById('aiApiKey').value.trim();
+            const imageModel = document.getElementById('aiImageModel').value.trim();
+
+            if (!apiKey) {
+                alert('请输入API Key');
+                return;
+            }
+            if (!baseUrl) {
+                alert('请输入API地址');
+                return;
+            }
+
+            showLoading('保存配置中...');
+            try {
+                const response = await fetch('/api/save-ai-config', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        provider,
+                        base_url: baseUrl,
+                        api_key: apiKey,
+                        image_model: imageModel,
+                        model: imageModel
+                    })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.success) {
+                        document.getElementById('configStatus').textContent = '配置已保存';
+                        document.getElementById('configStatus').style.color = 'var(--accent-green)';
+                        setStatus('AI配置已保存', 'success');
+                    }
+                } else {
+                    alert('保存失败');
+                }
+            } catch (e) {
+                alert('保存失败: ' + e.message);
+            }
+            hideLoading();
+        }
+
+        async function testAiConnection() {
+            const baseUrl = document.getElementById('aiBaseUrl').value.trim();
+            const apiKey = document.getElementById('aiApiKey').value.trim();
+            const imageModel = document.getElementById('aiImageModel').value.trim();
+            const provider = document.getElementById('aiProvider').value;
+
+            if (!apiKey) {
+                alert('请输入API Key');
+                return;
+            }
+
+            const btn = document.getElementById('testConnBtn');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<span>⏳</span> 测试中...';
+            btn.disabled = true;
+
+            try {
+                const response = await fetch('/api/test-ai-connection', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        provider,
+                        base_url: baseUrl,
+                        api_key: apiKey,
+                        image_model: imageModel
+                    })
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    document.getElementById('configStatus').textContent = '✓ 连接成功';
+                    document.getElementById('configStatus').style.color = 'var(--accent-green)';
+                    setStatus('AI API连接成功', 'success');
+                } else {
+                    document.getElementById('configStatus').textContent = '✗ ' + data.error;
+                    document.getElementById('configStatus').style.color = '#e74c3c';
+                    setStatus('连接失败: ' + data.error, 'error');
+                }
+            } catch (e) {
+                document.getElementById('configStatus').textContent = '✗ 连接失败';
+                document.getElementById('configStatus').style.color = '#e74c3c';
+            }
+
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+        }
+
+        async function generateAnimation() {
+            if (!selectedSprite) {
+                alert('请先选择一张精灵图');
+                return;
+            }
+
+            const frameCount = parseInt(document.getElementById('frameCount').value);
+            const intensity = parseInt(document.getElementById('animIntensity').value) / 100;
+
+            if (currentMode === 'ai') {
+                await generateAiAnimation(frameCount, intensity);
+            } else {
+                await generateLocalAnimation(frameCount, intensity);
+            }
+        }
+
+        async function generateLocalAnimation(frameCount, intensity) {
+            showLoading('生成动画中...');
+            try {
+                const response = await fetch('/api/generate-animation', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        filename: selectedSprite,
+                        type: selectedAnimation,
+                        frames: frameCount,
+                        params: { intensity: intensity }
+                    })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    await loadAnimationFrames(data.frames);
+                    setStatus(`生成成功! 共${data.frame_count}帧`, 'success');
+                } else {
+                    const err = await response.json();
+                    setStatus(`生成失败: ${err.error}`, 'error');
+                }
+            } catch (e) {
+                setStatus('生成失败', 'error');
+                console.error(e);
+            }
+            hideLoading();
+        }
+
+        async function generateAiAnimation(frameCount, intensity) {
+            const apiKey = document.getElementById('aiApiKey').value.trim();
+            const baseUrl = document.getElementById('aiBaseUrl').value.trim();
+            const imageModel = document.getElementById('aiImageModel').value.trim();
+            const prompt = document.getElementById('promptInput').value.trim();
+            const provider = document.getElementById('aiProvider').value;
+
+            if (!apiKey) {
+                if (confirm('未配置API Key，是否切换到本地变换模式？')) {
+                    switchMode('local');
+                    await generateLocalAnimation(frameCount, intensity);
+                }
+                return;
+            }
+
+            // 先保存配置
+            await fetch('/api/save-ai-config', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    provider,
+                    base_url: baseUrl,
+                    api_key: apiKey,
+                    image_model: imageModel,
+                    model: imageModel
+                })
+            });
+
+            showLoading('AI生成中...\n可能需要30-60秒');
+            try {
+                const response = await fetch('/api/ai-generate-animation', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        filename: selectedSprite,
+                        type: selectedAnimation,
+                        prompt: prompt,
+                        frames: frameCount,
+                        params: { intensity: intensity }
+                    })
+                });
+
+                const data = await response.json();
+                
+                if (data.success) {
+                    await loadAnimationFrames(data.frames);
+                    setStatus(`AI生成成功! 共${data.frame_count}帧`, 'success');
+                } else {
+                    const errorMsg = data.error || '生成失败';
+                    if (data.fallback_available) {
+                        if (confirm(`AI生成失败: ${errorMsg}\n\n是否使用本地变换模式生成？`)) {
+                            switchMode('local');
+                            await generateLocalAnimation(frameCount, intensity);
+                        }
+                    } else {
+                        setStatus(`AI生成失败: ${errorMsg}`, 'error');
+                    }
+                }
+            } catch (e) {
+                setStatus('生成失败: ' + e.message, 'error');
+                console.error(e);
+            }
+            hideLoading();
+        }
+
+        async function loadAnimationFrames(frameNames) {
+            animationFrames = [];
+            const promises = frameNames.map(name => {
+                return new Promise((resolve) => {
+                    const img = new Image();
+                    img.onload = () => resolve({ name, img });
+                    img.onerror = () => resolve(null);
+                    img.src = `/preview/${name}?t=${Date.now()}`;
+                });
+            });
+
+            const results = await Promise.all(promises);
+            animationFrames = results.filter(r => r !== null);
+
+            if (animationFrames.length > 0) {
+                currentFrame = 0;
+                updateFrameInfo();
+                showFrame(0);
+                if (!isPlaying) togglePlay();
+            }
+        }
+
+        function showFrame(index) {
+            if (animationFrames.length === 0) return;
+
+            const canvas = document.getElementById('previewCanvas');
+            const ctx = canvas.getContext('2d');
+            const frame = animationFrames[index];
+
+            canvas.width = frame.img.width;
+            canvas.height = frame.img.height;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.drawImage(frame.img, 0, 0);
+        }
+
+        function togglePlay() {
+            if (animationFrames.length === 0) return;
+
+            isPlaying = !isPlaying;
+            const btn = document.getElementById('playBtn');
+            btn.textContent = isPlaying ? '⏸️' : '▶️';
+
+            if (isPlaying) {
+                startAnimation();
+            } else {
+                stopAnimation();
+            }
+        }
+
+        function startAnimation() {
+            stopAnimation();
+            playInterval = setInterval(() => {
+                currentFrame = (currentFrame + 1) % animationFrames.length;
+                showFrame(currentFrame);
+                updateFrameInfo();
+            }, 1000 / fps);
+        }
+
+        function stopAnimation() {
+            if (playInterval) {
+                clearInterval(playInterval);
+                playInterval = null;
+            }
+        }
+
+        function updateSpeed(value) {
+            fps = parseInt(value);
+            document.getElementById('speedValue').textContent = fps + 'fps';
+            if (isPlaying) startAnimation();
+        }
+
+        function updateFrameValue() {
+            document.getElementById('frameValue').textContent = document.getElementById('frameCount').value;
+        }
+
+        function updateIntensityValue() {
+            document.getElementById('intensityValue').textContent = document.getElementById('animIntensity').value + '%';
+        }
+
+        function updateFrameInfo() {
+            const info = document.getElementById('frameInfo');
+            if (animationFrames.length === 0) {
+                info.textContent = '暂无帧';
+            } else {
+                info.textContent = `帧 ${currentFrame + 1} / ${animationFrames.length}`;
+            }
+        }
+
+        function exportFrames() {
+            if (animationFrames.length === 0) {
+                alert('请先生成动画');
+                return;
+            }
+
+            showLoading('导出序列帧...');
+            animationFrames.forEach((frame, i) => {
+                setTimeout(() => {
+                    const link = document.createElement('a');
+                    link.href = frame.img.src;
+                    link.download = frame.name;
+                    link.click();
+                }, i * 150);
+            });
+            setTimeout(() => {
+                hideLoading();
+                setStatus('序列帧导出完成', 'success');
+            }, animationFrames.length * 150);
+        }
+
+        function exportSpritesheet() {
+            if (animationFrames.length === 0) {
+                alert('请先生成动画');
+                return;
+            }
+
+            showLoading('生成精灵图...');
+            setTimeout(async () => {
+                const cols = Math.min(animationFrames.length, 4);
+                const rows = Math.ceil(animationFrames.length / cols);
+                const fw = animationFrames[0].img.width;
+                const fh = animationFrames[0].img.height;
+
+                const canvas = document.createElement('canvas');
+                canvas.width = fw * cols;
+                canvas.height = fh * rows;
+                const ctx = canvas.getContext('2d');
+
+                animationFrames.forEach((frame, i) => {
+                    const col = i % cols;
+                    const row = Math.floor(i / cols);
+                    ctx.drawImage(frame.img, col * fw, row * fh);
+                });
+
+                canvas.toBlob((blob) => {
+                    const url = URL.createObjectURL(blob);
+                    const link = document.createElement('a');
+                    link.href = url;
+                    link.download = 'animation_sheet.png';
+                    link.click();
+                    URL.revokeObjectURL(url);
+                    hideLoading();
+                    setStatus('精灵图导出完成', 'success');
+                }, 'image/png');
+            }, 100);
+        }
+
+        async function exportGIF() {
+            if (animationFrames.length === 0) {
+                alert('请先生成动画');
+                return;
+            }
+
+            showLoading('生成GIF...');
+
+            try {
+                const canvas = document.createElement('canvas');
+                const firstImg = animationFrames[0].img;
+                canvas.width = firstImg.width;
+                canvas.height = firstImg.height;
+                const ctx = canvas.getContext('2d');
+
+                const framesData = [];
+                for (const frame of animationFrames) {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    ctx.drawImage(frame.img, 0, 0);
+                    framesData.push(ctx.getImageData(0, 0, canvas.width, canvas.height));
+                }
+
+                const gif = await createGIF(canvas.width, canvas.height, framesData, 1000 / fps);
+
+                const url = URL.createObjectURL(gif);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = 'animation.gif';
+                link.click();
+                URL.revokeObjectURL(url);
+
+                setStatus('GIF导出完成', 'success');
+            } catch (e) {
+                console.error(e);
+                setStatus('GIF生成失败，请使用序列帧导出', 'error');
+            }
+
+            hideLoading();
+        }
+
+        async function createGIF(width, height, frames, delay) {
+            const delayCs = Math.round(delay / 10);
+
+            function writeShort(value) {
+                return new Uint8Array([value & 0xFF, (value >> 8) & 0xFF]);
+            }
+
+            function colorToRgb(color) {
+                return [color & 0xFF, (color >> 8) & 0xFF, (color >> 16) & 0xFF];
+            }
+
+            function quantize(imageData) {
+                const palette = [];
+                const pixels = [];
+
+                for (let i = 0; i < imageData.data.length; i += 4) {
+                    const r = imageData.data[i];
+                    const g = imageData.data[i + 1];
+                    const b = imageData.data[i + 2];
+                    const a = imageData.data[i + 3];
+
+                    if (a < 128) {
+                        pixels.push(0);
+                        continue;
+                    }
+
+                    const color = (r << 16) | (g << 8) | b;
+                    let index = palette.findIndex(c => c === color);
+                    if (index === -1) {
+                        if (palette.length < 255) {
+                            palette.push(color);
+                            index = palette.length;
+                        } else {
+                            let minDist = Infinity;
+                            let minIdx = 0;
+                            palette.forEach((c, idx) => {
+                                const dr = r - ((c >> 16) & 0xFF);
+                                const dg = g - ((c >> 8) & 0xFF);
+                                const db = b - (c & 0xFF);
+                                const dist = dr * dr + dg * dg + db * db;
+                                if (dist < minDist) {
+                                    minDist = dist;
+                                    minIdx = idx;
+                                }
+                            });
+                            index = minIdx + 1;
+                        }
+                    } else {
+                        index = index + 1;
+                    }
+                    pixels.push(index);
+                }
+
+                return { palette, pixels };
+            }
+
+            function lzwEncode(pixels, minCodeSize) {
+                const clearCode = 1 << minCodeSize;
+                const eoiCode = clearCode + 1;
+                let codeSize = minCodeSize + 1;
+                let dict = new Map();
+                let code = clearCode + 2;
+
+                for (let i = 0; i < clearCode; i++) {
+                    dict.set(String(i), i);
+                }
+
+                const output = [];
+                let current = '';
+                let bitBuffer = 0;
+                let bitCount = 0;
+
+                function writeCode(code) {
+                    bitBuffer |= code << bitCount;
+                    bitCount += codeSize;
+                    while (bitCount >= 8) {
+                        output.push(bitBuffer & 0xFF);
+                        bitBuffer >>= 8;
+                        bitCount -= 8;
+                    }
+                }
+
+                writeCode(clearCode);
+
+                for (const pixel of pixels) {
+                    const next = current + ',' + pixel;
+                    if (dict.has(next)) {
+                        current = next;
+                    } else {
+                        writeCode(dict.get(current));
+                        if (code < 4096) {
+                            dict.set(next, code++);
+                            if (code > (1 << codeSize) && codeSize < 12) {
+                                codeSize++;
+                            }
+                        }
+                        current = String(pixel);
+                    }
+                }
+
+                writeCode(dict.get(current));
+                writeCode(eoiCode);
+
+                if (bitCount > 0) {
+                    output.push(bitBuffer & 0xFF);
+                }
+
+                return { data: output, minCodeSize };
+            }
+
+            const firstFrame = frames[0];
+            const { palette, pixels } = quantize(firstFrame);
+            const paletteSize = Math.max(2, Math.ceil(Math.log2(palette.length + 1)));
+            const actualPaletteSize = 1 << paletteSize;
+
+            const gifParts = [];
+
+            gifParts.push(new Uint8Array([0x47, 0x49, 0x46, 0x38, 0x39, 0x61]));
+            gifParts.push(writeShort(width));
+            gifParts.push(writeShort(height));
+            gifParts.push(new Uint8Array([0xF0 | (paletteSize - 1), 0, 0]));
+
+            const paletteBytes = new Uint8Array(actualPaletteSize * 3);
+            paletteBytes[0] = 0;
+            paletteBytes[1] = 0;
+            paletteBytes[2] = 0;
+            palette.forEach((color, i) => {
+                const [r, g, b] = colorToRgb(color);
+                const idx = (i + 1) * 3;
+                paletteBytes[idx] = r;
+                paletteBytes[idx + 1] = g;
+                paletteBytes[idx + 2] = b;
+            });
+            gifParts.push(paletteBytes);
+
+            gifParts.push(new Uint8Array([0x21, 0xFF, 0x0B, 0x4E, 0x45, 0x54, 0x53, 0x43, 0x41, 0x50, 0x45, 0x32, 0x2E, 0x30, 0x03, 0x01, 0x00, 0x00, 0x00]));
+
+            for (let fi = 0; fi < frames.length; fi++) {
+                const frame = frames[fi];
+                const { pixels: framePixels } = quantize(frame);
+
+                gifParts.push(new Uint8Array([0x21, 0xF9, 0x04, 0x09, delayCs & 0xFF, (delayCs >> 8) & 0xFF, 0x00, 0x00]));
+                gifParts.push(new Uint8Array([0x2C]));
+                gifParts.push(writeShort(0));
+                gifParts.push(writeShort(0));
+                gifParts.push(writeShort(width));
+                gifParts.push(writeShort(height));
+                gifParts.push(new Uint8Array([0]));
+
+                const { data: lzwData, minCodeSize } = lzwEncode(framePixels, paletteSize);
+
+                const subBlocks = [];
+                for (let i = 0; i < lzwData.length; i += 255) {
+                    const chunk = lzwData.slice(i, Math.min(i + 255, lzwData.length));
+                    subBlocks.push(chunk.length);
+                    subBlocks.push(...chunk);
+                }
+                subBlocks.push(0);
+
+                gifParts.push(new Uint8Array([minCodeSize]));
+                gifParts.push(new Uint8Array(subBlocks));
+            }
+
+            gifParts.push(new Uint8Array([0x3B]));
+
+            const totalLength = gifParts.reduce((sum, part) => sum + part.length, 0);
+            const gifBytes = new Uint8Array(totalLength);
+            let offset = 0;
+            for (const part of gifParts) {
+                gifBytes.set(part, offset);
+                offset += part.length;
+            }
+
+            return new Blob([gifBytes], { type: 'image/gif' });
+        }
+
+        function showLoading(text) {
+            document.getElementById('loadingText').textContent = text;
+            document.getElementById('loadingOverlay').classList.add('show');
+        }
+
+        function hideLoading() {
+            document.getElementById('loadingOverlay').classList.remove('show');
+        }
+
+        function setStatus(text, type = 'info') {
+            document.getElementById('statusText').textContent = text;
+            const dot = document.getElementById('statusDot');
+            dot.style.background = type === 'success' ? '#2ecc71' :
+                                   type === 'error' ? '#e74c3c' :
+                                   type === 'warning' ? '#f39c12' : '#4a9eff';
+        }
+
+        init();
+    </script>
+</body>
+</html>
