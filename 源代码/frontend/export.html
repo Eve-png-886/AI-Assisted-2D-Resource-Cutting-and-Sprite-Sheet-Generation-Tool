@@ -1,0 +1,1491 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>导出配置 - AI游戏资源切割工具</title>
+    <style>
+        :root {
+            --bg-primary: #1a1a2e;
+            --bg-secondary: #16213e;
+            --bg-tertiary: #0f0f23;
+            --text-primary: #e8e8e8;
+            --text-muted: #a0a0b0;
+            --accent-blue: #4a9eff;
+            --accent-green: #2ecc71;
+            --accent-purple: #9b59b6;
+            --border-color: #2a2a4a;
+            --card-bg: #1e1e3a;
+            --btn-hover: #2a2a5a;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .header {
+            background: var(--bg-secondary);
+            padding: 12px 24px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .logo {
+            font-size: 20px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo-icon {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+
+        .nav-menu {
+            display: flex;
+            gap: 8px;
+        }
+
+        .nav-item {
+            padding: 8px 16px;
+            border-radius: 6px;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+
+        .nav-item:hover {
+            background: var(--btn-hover);
+            color: var(--text-primary);
+        }
+
+        .nav-item.active {
+            background: var(--accent-blue);
+            color: white;
+        }
+
+        .content {
+            flex: 1;
+            display: flex;
+            overflow: hidden;
+        }
+
+        .sidebar {
+            width: 360px;
+            background: var(--bg-secondary);
+            border-right: 1px solid var(--border-color);
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .main-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .panel {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .panel-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 12px 16px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent-blue), #6b7fff);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(74, 158, 255, 0.4);
+        }
+
+        .btn-green {
+            background: linear-gradient(135deg, var(--accent-green), #27ae60);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-secondary:hover {
+            background: var(--btn-hover);
+        }
+
+        .input-group {
+            margin-bottom: 14px;
+        }
+
+        .input-label {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+            display: block;
+        }
+
+        select {
+            width: 100%;
+            padding: 10px 12px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            color: var(--text-primary);
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 16px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: 600;
+            color: var(--accent-blue);
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        .file-list {
+            flex: 1;
+            padding: 20px;
+            overflow: auto;
+            background: var(--bg-tertiary);
+        }
+
+        .file-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 16px;
+        }
+
+        .file-item {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            overflow: hidden;
+            transition: transform 0.2s;
+            position: relative;
+        }
+
+        .file-item.selected {
+            border-color: var(--accent-green);
+            box-shadow: 0 0 0 2px rgba(46, 204, 113, 0.2);
+        }
+
+        .file-item:hover {
+            transform: translateY(-2px);
+        }
+
+        .file-item.animation-group {
+            border-color: var(--accent-purple);
+        }
+
+        .delete-btn, .download-btn, .preview-btn {
+            position: absolute;
+            top: 8px;
+            padding: 4px;
+            border: none;
+            border-radius: 4px;
+            font-size: 12px;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.2s;
+            z-index: 3;
+        }
+
+        .file-item:hover .delete-btn,
+        .file-item:hover .download-btn,
+        .file-item:hover .preview-btn {
+            opacity: 1;
+        }
+
+        .delete-btn {
+            right: 8px;
+            background: rgba(231, 76, 60, 0.8);
+            color: white;
+        }
+
+        .delete-btn:hover {
+            background: rgba(231, 76, 60, 1);
+        }
+
+        .download-btn {
+            right: 36px;
+            background: rgba(74, 158, 255, 0.8);
+            color: white;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .download-btn:hover {
+            background: rgba(74, 158, 255, 1);
+        }
+
+        .preview-btn {
+            right: 64px;
+            background: rgba(155, 89, 182, 0.8);
+            color: white;
+        }
+
+        .preview-btn:hover {
+            background: rgba(155, 89, 182, 1);
+        }
+
+        .file-checkbox {
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            z-index: 2;
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+            accent-color: var(--accent-green);
+        }
+
+        .file-icon {
+            font-size: 48px;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .file-info {
+            padding: 12px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .file-name {
+            font-size: 12px;
+            color: var(--text-primary);
+            word-break: break-all;
+            margin-bottom: 4px;
+        }
+
+        .file-size {
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        .category-tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px;
+            padding: 16px;
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .category-tab {
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            color: var(--text-muted);
+            transition: all 0.2s;
+        }
+
+        .category-tab:hover {
+            background: var(--btn-hover);
+            color: var(--text-primary);
+        }
+
+        .category-tab.active {
+            background: var(--accent-blue);
+            color: white;
+        }
+
+        .engine-card {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .engine-card:hover {
+            border-color: var(--accent-blue);
+            background: var(--btn-hover);
+        }
+
+        .engine-card.selected {
+            border-color: var(--accent-green);
+            background: rgba(46, 204, 113, 0.1);
+        }
+
+        .engine-icon {
+            font-size: 32px;
+        }
+
+        .engine-info {
+            flex: 1;
+        }
+
+        .engine-name {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .engine-desc {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .format-options {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+        }
+
+        .format-option {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 12px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .format-option:hover {
+            border-color: var(--accent-blue);
+        }
+
+        .format-option.selected {
+            border-color: var(--accent-green);
+            background: rgba(46, 204, 113, 0.1);
+        }
+
+        .format-name {
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .format-desc {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        .placeholder {
+            text-align: center;
+            color: var(--text-muted);
+            padding: 80px;
+        }
+
+        .placeholder-icon {
+            font-size: 64px;
+            margin-bottom: 16px;
+        }
+
+        .location-info {
+            background: rgba(74, 158, 255, 0.1);
+            border: 1px solid var(--accent-blue);
+            border-radius: 6px;
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+
+        .location-path {
+            flex: 1;
+            font-size: 13px;
+            color: var(--text-muted);
+            word-break: break-all;
+        }
+
+        .download-all-btn {
+            background: linear-gradient(135deg, #27ae60, #2ecc71) !important;
+        }
+
+        .download-all-btn:hover {
+            box-shadow: 0 4px 12px rgba(46, 204, 113, 0.4) !important;
+        }
+
+        .preview-modal {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.85);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .preview-modal.show { display: flex; }
+
+        .preview-modal-content {
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            padding: 24px;
+            max-width: 90vw;
+            max-height: 90vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+        }
+
+        .preview-modal-close {
+            position: absolute;
+            top: 12px;
+            right: 16px;
+            font-size: 24px;
+            cursor: pointer;
+            color: var(--text-muted);
+            background: none;
+            border: none;
+        }
+
+        .preview-modal-close:hover { color: var(--text-primary); }
+
+        .preview-canvas-container {
+            background: linear-gradient(45deg, #2a2a4a 25%, transparent 25%, transparent 75%, #2a2a4a 75%, #2a2a4a),
+                        linear-gradient(45deg, #2a2a4a 25%, transparent 25%, transparent 75%, #2a2a4a 75%, #2a2a4a);
+            background-size: 20px 20px;
+            background-position: 0 0, 10px 10px;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 16px 0;
+        }
+
+        #previewModalCanvas {
+            max-width: 400px;
+            max-height: 400px;
+            image-rendering: pixelated;
+        }
+
+        .preview-modal-info {
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 13px;
+            margin-top: 8px;
+        }
+
+        .preview-modal-controls {
+            display: flex;
+            gap: 12px;
+            margin-top: 16px;
+            align-items: center;
+        }
+
+        .preview-play-btn {
+            width: 36px; height: 36px;
+            border-radius: 50%;
+            background: var(--accent-green);
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .anim-play-badge {
+            position: absolute;
+            bottom: 8px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            font-size: 10px;
+            padding: 2px 8px;
+            border-radius: 10px;
+            pointer-events: none;
+        }
+
+        .file-item.animation-file {
+            cursor: pointer;
+        }
+
+        .status-bar {
+            background: var(--bg-secondary);
+            border-top: 1px solid var(--border-color);
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 13px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--accent-green);
+            display: inline-block;
+            margin-right: 8px;
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="logo">
+            <div class="logo-icon">🎮</div>
+            <span>AI游戏资源切割工具</span>
+        </div>
+        <nav class="nav-menu">
+            <a href="/" class="nav-item">🏠 工作台</a>
+            <a href="/ai-slicing" class="nav-item">🤖 AI切割</a>
+            <a href="/spritesheet" class="nav-item">📦 精灵图</a>
+            <a href="/nine-patch" class="nav-item">📐 九宫格</a>
+            <a href="/animation" class="nav-item">🎬 动画生成</a>
+            <a href="/export" class="nav-item active">📤 导出</a>
+        </nav>
+    </header>
+
+    <div class="content">
+        <aside class="sidebar">
+            <div class="panel">
+                <div class="panel-title">🎮 目标引擎</div>
+                <div class="engine-card selected" onclick="selectEngine('unity')">
+                    <div class="engine-icon">🎯</div>
+                    <div class="engine-info">
+                        <div class="engine-name">Unity</div>
+                        <div class="engine-desc">SpriteAtlas + .meta + Prefab</div>
+                    </div>
+                </div>
+                <div class="engine-card" onclick="selectEngine('cocos')">
+                    <div class="engine-icon">🎮</div>
+                    <div class="engine-info">
+                        <div class="engine-name">Cocos2d-x</div>
+                        <div class="engine-desc">plist + JSON</div>
+                    </div>
+                </div>
+                <div class="engine-card" onclick="selectEngine('unreal')">
+                    <div class="engine-icon">💎</div>
+                    <div class="engine-info">
+                        <div class="engine-name">Unreal Engine</div>
+                        <div class="engine-desc">Texture2D + .ini</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-title">📁 导出格式</div>
+                <div class="format-options">
+                    <div class="format-option selected" onclick="selectFormat('png')">
+                        <div class="format-name">PNG</div>
+                        <div class="format-desc">无损压缩，支持透明</div>
+                    </div>
+                    <div class="format-option" onclick="selectFormat('webp')">
+                        <div class="format-name">WebP</div>
+                        <div class="format-desc">压缩率高，体积小</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-title">📋 导出选项</div>
+                <div style="display: flex; flex-direction: column; gap: 8px;">
+                    <label style="display: flex; align-items: center; gap: 8px; font-size: 13px; cursor: pointer;">
+                        <input type="checkbox" id="optSpritesheet" checked onchange="toggleFileType('spritesheet')">
+                        <span>导出精灵图集</span>
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 8px; font-size: 13px; cursor: pointer;">
+                        <input type="checkbox" id="optConfig" checked onchange="toggleFileType('config')">
+                        <span>导出配置文件</span>
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 8px; font-size: 13px; cursor: pointer;">
+                        <input type="checkbox" id="optCut" onchange="toggleFileType('cut')">
+                        <span>单独导出切割图</span>
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 8px; font-size: 13px; cursor: pointer;">
+                        <input type="checkbox" id="optNinepatch" onchange="toggleFileType('ninepatch')">
+                        <span>导出九宫格资源</span>
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 8px; font-size: 13px; cursor: pointer;">
+                        <input type="checkbox" id="optAnimation" onchange="toggleFileType('animation')">
+                        <span>导出动画序列</span>
+                    </label>
+                </div>
+                <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border-color);">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 12px; color: var(--text-muted);">
+                        <span>已选择: <span id="selectedCount">0</span> 个文件</span>
+                        <span>
+                            <a href="#" onclick="selectAllFiles(event)" style="color: var(--accent-blue); text-decoration: none;">全选</a>
+                            <span style="color: var(--border-color);"> | </span>
+                            <a href="#" onclick="deselectAllFiles(event)" style="color: var(--accent-blue); text-decoration: none;">取消</a>
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <button class="btn btn-primary" onclick="exportSelected()">
+                <span>📤</span> 导出选中
+            </button>
+            <div style="height: 8px;"></div>
+            <button class="btn btn-secondary" onclick="openOutputFolder()">
+                <span>📂</span> 打开输出文件夹
+            </button>
+        </aside>
+
+        <section class="main-area">
+            <div class="category-tabs">
+                <div class="category-tab active" onclick="filterFiles('all')">全部</div>
+                <div class="category-tab" onclick="filterFiles('spritesheet')">精灵图</div>
+                <div class="category-tab" onclick="filterFiles('cut')">切割图</div>
+                <div class="category-tab" onclick="filterFiles('ninepatch')">九宫格</div>
+                <div class="category-tab" onclick="filterFiles('animation')">动画序列</div>
+                <div class="category-tab" onclick="filterFiles('config')">配置文件</div>
+            </div>
+
+            <div class="file-list">
+                <div class="location-info">
+                    <span>📂</span>
+                    <span class="location-path" id="outputPath">文件导出位置：游戏目录/outputs/</span>
+                    <button class="btn btn-secondary" style="width: auto; padding: 6px 12px; font-size: 12px;" onclick="openOutputFolder()">
+                        打开文件夹
+                    </button>
+                </div>
+
+                <div id="fileGrid" class="file-grid">
+                    <div class="placeholder">
+                        <div class="placeholder-icon">📦</div>
+                        <div style="font-size: 18px; margin-bottom: 8px;">暂无导出文件</div>
+                        <div style="font-size: 14px; color: var(--text-muted);">请先在工作台页面完成切割和导出操作</div>
+                        <button class="btn btn-primary" style="margin-top: 20px; width: auto;" onclick="window.location.href='/spritesheet'">
+                            <span>🎨</span> 前往精灵图生成
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div style="padding: 16px; background: var(--bg-secondary); border-top: 1px solid var(--border-color);">
+                <div class="stats-container">
+                    <div class="stat-card">
+                        <div class="stat-value" id="totalFiles">0</div>
+                        <div class="stat-label">文件总数</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="totalSize">0 KB</div>
+                        <div class="stat-label">总大小</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="exportTime">-</div>
+                        <div class="stat-label">导出时间</div>
+                    </div>
+                </div>
+                <div style="margin-top: 12px;">
+                    <button class="btn download-all-btn" id="downloadAllBtn" onclick="downloadSelectedFiles()" style="display: none;">
+                        <span>📥</span> 下载选中文件
+                    </button>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <div class="preview-modal" id="animPreviewModal" onclick="closeAnimPreview(event)">
+        <div class="preview-modal-content" onclick="event.stopPropagation()">
+            <button class="preview-modal-close" onclick="closeAnimPreview()">✕</button>
+            <h3 style="margin-bottom: 8px;" id="animPreviewTitle">动画预览</h3>
+            <div class="preview-canvas-container">
+                <canvas id="previewModalCanvas" width="200" height="200"></canvas>
+            </div>
+            <div class="preview-modal-controls">
+                <button class="preview-play-btn" onclick="toggleAnimPreviewPlay()" id="animPreviewPlayBtn">▶️</button>
+                <div style="font-size: 12px; color: var(--text-muted);">
+                    速度: <input type="range" min="1" max="30" value="10" style="width: 100px; vertical-align: middle;" oninput="updateAnimPreviewSpeed(this.value)">
+                    <span id="animPreviewSpeedText">10fps</span>
+                </div>
+            </div>
+            <div class="preview-modal-info" id="animPreviewInfo">0 帧</div>
+            <div style="margin-top: 16px; display: flex; gap: 8px;">
+                <button class="btn btn-secondary" style="width: auto; padding: 8px 16px;" onclick="downloadAnimFrames()">📥 下载序列帧</button>
+                <button class="btn btn-green" style="width: auto; padding: 8px 16px;" onclick="downloadAnimGIF()">🎞️ 下载GIF</button>
+            </div>
+        </div>
+    </div>
+
+    <footer class="status-bar">
+        <div><span class="status-dot" id="statusDot"></span><span id="statusText">准备就绪</span></div>
+        <div style="color: var(--text-muted);">多引擎支持 · 一键导出</div>
+    </footer>
+
+    <script>
+        let selectedEngine = 'unity';
+        let selectedFormat = 'png';
+        let files = [];
+        let selectedFiles = new Set();
+        let currentCategory = 'all';
+
+        async function loadFiles() {
+            try {
+                const response = await fetch('/get-outputs');
+                if (response.ok) {
+                    const data = await response.json();
+                    files = data.files;
+                    
+                    selectedFiles.clear();
+                    const defaultTypes = ['spritesheet', 'config'];
+                    files.forEach(file => {
+                        if (defaultTypes.includes(getFileType(file))) {
+                            selectedFiles.add(file);
+                        }
+                    });
+                    
+                    updateSidebarCheckboxes();
+                    updateSelectedCount();
+                    renderFiles('all');
+                    updateStats();
+                    updateDownloadButton();
+                }
+            } catch (error) {
+                console.error('Failed to load files:', error);
+            }
+        }
+
+        async function loadOutputPath() {
+            try {
+                const response = await fetch('/get-output-path');
+                if (response.ok) {
+                    const data = await response.json();
+                    document.getElementById('outputPath').textContent = '文件导出位置：' + data.path;
+                }
+            } catch (error) {
+                console.error('Failed to load path:', error);
+            }
+        }
+
+        function selectEngine(engine) {
+            selectedEngine = engine;
+            document.querySelectorAll('.engine-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            document.querySelector(`[onclick="selectEngine('${engine}')"]`).classList.add('selected');
+        }
+
+        function selectFormat(format) {
+            selectedFormat = format;
+            document.querySelectorAll('.format-option').forEach(opt => {
+                opt.classList.remove('selected');
+            });
+            document.querySelector(`[onclick="selectFormat('${format}')"]`).classList.add('selected');
+        }
+
+        function filterFiles(category) {
+            currentCategory = category;
+            document.querySelectorAll('.category-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelector(`[onclick="filterFiles('${category}')"]`).classList.add('active');
+            renderFiles(category);
+        }
+
+        function renderFiles(category) {
+            const grid = document.getElementById('fileGrid');
+            
+            if (files.length === 0) {
+                grid.innerHTML = `
+                    <div class="placeholder">
+                        <div class="placeholder-icon">📦</div>
+                        <div style="font-size: 18px; margin-bottom: 8px;">暂无导出文件</div>
+                        <div style="font-size: 14px; color: var(--text-muted);">请先在工作台页面完成切割和导出操作</div>
+                    </div>
+                `;
+                return;
+            }
+
+            const filtered = files.filter(file => {
+                if (category === 'all') return true;
+                return getFileType(file) === category;
+            });
+
+            if (filtered.length === 0) {
+                grid.innerHTML = `
+                    <div class="placeholder">
+                        <div class="placeholder-icon">📭</div>
+                        <div style="font-size: 14px; color: var(--text-muted);">该分类下暂无文件</div>
+                    </div>
+                `;
+                return;
+            }
+
+            const animGroups = {};
+            const otherFiles = [];
+            
+            filtered.forEach(file => {
+                const fileType = getFileType(file);
+                if (fileType === 'animation') {
+                    const animId = file.match(/anim_([a-z0-9]+)_/)?.[1];
+                    if (animId) {
+                        if (!animGroups[animId]) animGroups[animId] = [];
+                        animGroups[animId].push(file);
+                    }
+                } else {
+                    otherFiles.push(file);
+                }
+            });
+
+            let html = '';
+            
+            for (const [animId, animFiles] of Object.entries(animGroups)) {
+                const firstFile = animFiles[0];
+                const isSelected = animFiles.every(f => selectedFiles.has(f));
+                const sheetFile = animFiles.find(f => f.includes('_sheet'));
+                const previewFile = sheetFile || firstFile;
+                
+                html += `
+                    <div class="file-item animation-group ${isSelected ? 'selected' : ''}" 
+                         onclick="toggleAnimGroupSelection('${animId}', event)"
+                         data-anim-id="${animId}">
+                        <input type="checkbox" class="file-checkbox" ${isSelected ? 'checked' : ''} onclick="event.stopPropagation(); toggleAnimGroupSelection('${animId}', event)">
+                        <img src="/preview/${previewFile}?t=${Date.now()}" style="width: 100%; height: 100px; object-fit: contain; background: linear-gradient(45deg, #2a2a4a 25%, transparent 25%, transparent 75%, #2a2a4a 75%, #2a2a4a), 
+                    linear-gradient(45deg, #2a2a4a 25%, transparent 25%, transparent 75%, #2a2a4a 75%, #2a2a4a); background-size: 10px 10px; pointer-events: none;">
+                        <div class="anim-play-badge">▶ 动画</div>
+                        <div class="file-info">
+                            <div class="file-name">动画序列 ${animId}</div>
+                            <div class="file-size">${animFiles.length} 帧</div>
+                        </div>
+                        <button class="delete-btn" onclick="event.stopPropagation(); deleteAnimGroup('${animId}')" title="删除">🗑️</button>
+                        <button class="preview-btn" onclick="event.stopPropagation(); openAnimPreview('${animId}')" title="预览">👁️</button>
+                        <a href="/preview/${previewFile}" download="${previewFile}" class="download-btn" onclick="event.stopPropagation()" title="下载">⬇️</a>
+                    </div>
+                `;
+            }
+
+            otherFiles.forEach(file => {
+                const isImage = file.endsWith('.png');
+                const isConfig = file.endsWith('.json') || file.endsWith('.plist') || file.endsWith('.ini') || file.endsWith('.meta') || file.endsWith('.prefab');
+                const isSelected = selectedFiles.has(file);
+                const fileType = getFileType(file);
+                
+                let icon = '📄';
+                if (isImage) icon = '🖼️';
+                else if (file.endsWith('.json')) icon = '📋';
+                else if (file.endsWith('.plist')) icon = '📑';
+                else if (file.endsWith('.ini')) icon = '⚙️';
+                else if (file.endsWith('.meta')) icon = '🏷️';
+                else if (file.endsWith('.prefab')) icon = '🧩';
+
+                html += `
+                    <div class="file-item ${isSelected ? 'selected' : ''}" 
+                         onclick="toggleFileSelection('${file}', event)">
+                        <input type="checkbox" class="file-checkbox" ${isSelected ? 'checked' : ''} onclick="event.stopPropagation(); toggleFileSelection('${file}', event)">
+                        ${isImage ? 
+                            `<img src="/preview/${file}?t=${Date.now()}" style="width: 100%; height: 100px; object-fit: contain; background: linear-gradient(45deg, #2a2a4a 25%, transparent 25%, transparent 75%, #2a2a4a 75%, #2a2a4a), 
+                        linear-gradient(45deg, #2a2a4a 25%, transparent 25%, transparent 75%, #2a2a4a 75%, #2a2a4a); background-size: 10px 10px; pointer-events: none;">` : 
+                            `<div class="file-icon">${icon}</div>`
+                        }
+                        <div class="file-info">
+                            <div class="file-name">${file}</div>
+                            <div class="file-size">${getFileSize(file)}</div>
+                        </div>
+                        <button class="delete-btn" onclick="event.stopPropagation(); deleteSingleFile('${file}')" title="删除">🗑️</button>
+                        <a href="/preview/${file}" download="${file}" class="download-btn" onclick="event.stopPropagation()" title="下载">⬇️</a>
+                    </div>
+                `;
+            });
+
+            grid.innerHTML = html;
+        }
+
+        function getFileSize(filename) {
+            return '未知';
+        }
+
+        function getFileType(file) {
+            if (file.startsWith('anim_') && file.endsWith('.png')) return 'animation';
+            if (file.startsWith('spritesheet') && !file.startsWith('anim_')) return 'spritesheet';
+            if (file.startsWith('cut_')) return 'cut';
+            if (file.startsWith('ninepatch_')) return 'ninepatch';
+            if (file.endsWith('.json') || file.endsWith('.plist') || file.endsWith('.ini') || file.endsWith('.meta') || file.endsWith('.prefab')) return 'config';
+            return 'other';
+        }
+
+        function toggleFileSelection(file, event) {
+            if (event) event.preventDefault();
+            if (selectedFiles.has(file)) {
+                selectedFiles.delete(file);
+            } else {
+                selectedFiles.add(file);
+            }
+            updateSelectedCount();
+            renderFiles(currentCategory);
+        }
+
+        function toggleAnimGroupSelection(animId, event) {
+            if (event) event.preventDefault();
+            const animFiles = files.filter(f => f.startsWith(`anim_${animId}_`));
+            const allSelected = animFiles.every(f => selectedFiles.has(f));
+            
+            animFiles.forEach(file => {
+                if (allSelected) {
+                    selectedFiles.delete(file);
+                } else {
+                    selectedFiles.add(file);
+                }
+            });
+            updateSelectedCount();
+            renderFiles(currentCategory);
+        }
+
+        async function deleteSingleFile(file) {
+            if (!confirm(`确定要删除 "${file}" 吗？`)) return;
+            
+            try {
+                const response = await fetch('/api/delete-files', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ files: [file] })
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    selectedFiles.delete(file);
+                    await loadFiles();
+                    setStatus(data.message, 'success');
+                } else {
+                    alert('删除失败');
+                }
+            } catch (error) {
+                alert('删除失败: ' + error.message);
+            }
+        }
+
+        async function deleteAnimGroup(animId) {
+            const animFiles = files.filter(f => f.startsWith(`anim_${animId}_`));
+            if (!confirm(`确定要删除这个动画序列吗？\n共 ${animFiles.length} 个文件`)) return;
+            
+            try {
+                const response = await fetch('/api/delete-files', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ files: animFiles })
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    animFiles.forEach(f => selectedFiles.delete(f));
+                    await loadFiles();
+                    setStatus(data.message, 'success');
+                } else {
+                    alert('删除失败');
+                }
+            } catch (error) {
+                alert('删除失败: ' + error.message);
+            }
+        }
+
+        function toggleFileType(type) {
+            const typeFiles = files.filter(f => getFileType(f) === type);
+            const checkbox = document.getElementById('opt' + type.charAt(0).toUpperCase() + type.slice(1));
+            const isChecked = checkbox.checked;
+            
+            typeFiles.forEach(file => {
+                if (isChecked) {
+                    selectedFiles.add(file);
+                } else {
+                    selectedFiles.delete(file);
+                }
+            });
+            
+            updateSelectedCount();
+            renderFiles(currentCategory);
+        }
+
+        function selectAllFiles(event) {
+            if (event) event.preventDefault();
+            const filtered = getFilteredFiles(currentCategory);
+            filtered.forEach(file => selectedFiles.add(file));
+            updateSidebarCheckboxes();
+            updateSelectedCount();
+            renderFiles(currentCategory);
+        }
+
+        function deselectAllFiles(event) {
+            if (event) event.preventDefault();
+            const filtered = getFilteredFiles(currentCategory);
+            filtered.forEach(file => selectedFiles.delete(file));
+            updateSidebarCheckboxes();
+            updateSelectedCount();
+            renderFiles(currentCategory);
+        }
+
+        function getFilteredFiles(category) {
+            return files.filter(file => {
+                if (category === 'all') return true;
+                return getFileType(file) === category;
+            });
+        }
+
+        function updateSelectedCount() {
+            document.getElementById('selectedCount').textContent = selectedFiles.size;
+        }
+
+        function updateSidebarCheckboxes() {
+            const types = ['spritesheet', 'config', 'cut', 'ninepatch', 'animation'];
+            types.forEach(type => {
+                const typeFiles = files.filter(f => getFileType(f) === type);
+                const allSelected = typeFiles.length > 0 && typeFiles.every(f => selectedFiles.has(f));
+                const checkbox = document.getElementById('opt' + type.charAt(0).toUpperCase() + type.slice(1));
+                if (checkbox) checkbox.checked = allSelected;
+            });
+        }
+
+        function updateStats() {
+            document.getElementById('totalFiles').textContent = files.length;
+            document.getElementById('totalSize').textContent = '计算中...';
+            document.getElementById('exportTime').textContent = new Date().toLocaleString('zh-CN');
+            
+            setTimeout(() => {
+                document.getElementById('totalSize').textContent = '估计中...';
+            }, 100);
+        }
+
+        async function exportSelected() {
+            if (selectedFiles.size === 0) {
+                alert('请至少选择一个文件');
+                return;
+            }
+            
+            setStatus('导出中...', 'warning');
+            
+            try {
+                const response = await fetch('/export-engine-config', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        engine: selectedEngine,
+                        files: Array.from(selectedFiles)
+                    })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    setStatus(data.message, 'success');
+                    await loadFiles();
+                } else {
+                    const errData = await response.json();
+                    if (errData.error === '请先生成精灵图') {
+                        alert('请先在工作台页面生成精灵图');
+                    } else {
+                        setStatus(`导出失败：${errData.error}`, 'error');
+                    }
+                }
+            } catch (error) {
+                setStatus('导出失败', 'error');
+            }
+        }
+
+        async function openOutputFolder() {
+            try {
+                const response = await fetch('/preview/folder');
+                if (response.ok) {
+                    const data = await response.json();
+                    setStatus('文件夹已打开', 'success');
+                    
+                    const pathResponse = await fetch('/get-output-path');
+                    if (pathResponse.ok) {
+                        const pathData = await pathResponse.json();
+                        navigator.clipboard.writeText(pathData.path).then(() => {
+                            alert(`文件导出位置：\n${pathData.path}\n\n路径已复制到剪贴板！`);
+                        }).catch(() => {
+                            alert(`文件导出位置：\n${pathData.path}`);
+                        });
+                    }
+                } else {
+                    const errData = await response.json();
+                    setStatus(`打开失败：${errData.error}`, 'error');
+                }
+            } catch (error) {
+                setStatus('打开失败', 'error');
+                alert('无法打开文件夹，请手动访问：\n' + document.getElementById('outputPath').textContent.replace('文件导出位置：', ''));
+            }
+        }
+
+        function updateDownloadButton() {
+            const btn = document.getElementById('downloadAllBtn');
+            if (files.length > 0) {
+                btn.style.display = 'block';
+            } else {
+                btn.style.display = 'none';
+            }
+        }
+
+        async function downloadSelectedFiles() {
+            if (selectedFiles.size === 0) {
+                alert('请至少选择一个文件');
+                return;
+            }
+            
+            setStatus('准备下载...', 'warning');
+            try {
+                const selectedArray = Array.from(selectedFiles);
+                for (let i = 0; i < selectedArray.length; i++) {
+                    const file = selectedArray[i];
+                    const link = document.createElement('a');
+                    link.href = '/preview/' + file;
+                    link.download = file;
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    await new Promise(r => setTimeout(r, 200));
+                }
+                setStatus('下载完成', 'success');
+            } catch (error) {
+                setStatus('下载失败', 'error');
+            }
+        }
+
+        function setStatus(text, type = 'info') {
+            document.getElementById('statusText').textContent = text;
+            const statusDot = document.getElementById('statusDot');
+            
+            if (type === 'success') {
+                statusDot.style.background = '#2ecc71';
+            } else if (type === 'error') {
+                statusDot.style.background = '#e74c3c';
+            } else if (type === 'warning') {
+                statusDot.style.background = '#f39c12';
+            } else {
+                statusDot.style.background = '#2ecc71';
+            }
+        }
+
+        let currentAnimFrames = [];
+        let currentAnimFrameIndex = 0;
+        let animPreviewInterval = null;
+        let animPreviewFps = 10;
+        let currentAnimId = null;
+
+        async function openAnimPreview(animId) {
+            currentAnimId = animId;
+            const animFiles = files.filter(f => f.startsWith('anim_' + animId + '_') && f.endsWith('.png') && !f.includes('_sheet'));
+            animFiles.sort();
+            
+            if (animFiles.length === 0) {
+                alert('找不到动画帧文件');
+                return;
+            }
+
+            document.getElementById('animPreviewTitle').textContent = `动画 ${animId}`;
+            document.getElementById('animPreviewInfo').textContent = `${animFiles.length} 帧`;
+            document.getElementById('animPreviewModal').classList.add('show');
+
+            currentAnimFrames = [];
+            const promises = animFiles.map(name => {
+                return new Promise((resolve) => {
+                    const img = new Image();
+                    img.onload = () => resolve({ name, img });
+                    img.onerror = () => resolve(null);
+                    img.src = `/preview/${name}?t=${Date.now()}`;
+                });
+            });
+
+            const results = await Promise.all(promises);
+            currentAnimFrames = results.filter(r => r !== null);
+            
+            if (currentAnimFrames.length > 0) {
+                currentAnimFrameIndex = 0;
+                showAnimFrame(0);
+                startAnimPreview();
+            }
+        }
+
+        function closeAnimPreview(event) {
+            if (event && event.target !== event.currentTarget) return;
+            document.getElementById('animPreviewModal').classList.remove('show');
+            stopAnimPreview();
+            currentAnimFrames = [];
+        }
+
+        function showAnimFrame(index) {
+            if (currentAnimFrames.length === 0) return;
+            const canvas = document.getElementById('previewModalCanvas');
+            const ctx = canvas.getContext('2d');
+            const frame = currentAnimFrames[index];
+            
+            canvas.width = frame.img.width;
+            canvas.height = frame.img.height;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.drawImage(frame.img, 0, 0);
+        }
+
+        function toggleAnimPreviewPlay() {
+            if (animPreviewInterval) {
+                stopAnimPreview();
+            } else {
+                startAnimPreview();
+            }
+        }
+
+        function startAnimPreview() {
+            stopAnimPreview();
+            document.getElementById('animPreviewPlayBtn').textContent = '⏸️';
+            animPreviewInterval = setInterval(() => {
+                currentAnimFrameIndex = (currentAnimFrameIndex + 1) % currentAnimFrames.length;
+                showAnimFrame(currentAnimFrameIndex);
+            }, 1000 / animPreviewFps);
+        }
+
+        function stopAnimPreview() {
+            if (animPreviewInterval) {
+                clearInterval(animPreviewInterval);
+                animPreviewInterval = null;
+            }
+            document.getElementById('animPreviewPlayBtn').textContent = '▶️';
+        }
+
+        function updateAnimPreviewSpeed(value) {
+            animPreviewFps = parseInt(value);
+            document.getElementById('animPreviewSpeedText').textContent = animPreviewFps + 'fps';
+            if (animPreviewInterval) startAnimPreview();
+        }
+
+        function downloadAnimFrames() {
+            if (currentAnimFrames.length === 0) return;
+            currentAnimFrames.forEach((frame, i) => {
+                setTimeout(() => {
+                    const link = document.createElement('a');
+                    link.href = frame.img.src;
+                    link.download = frame.name;
+                    link.click();
+                }, i * 150);
+            });
+        }
+
+        async function downloadAnimGIF() {
+            if (currentAnimFrames.length === 0) return;
+
+            const firstImg = currentAnimFrames[0].img;
+            const canvas = document.createElement('canvas');
+            canvas.width = firstImg.width;
+            canvas.height = firstImg.height;
+            const ctx = canvas.getContext('2d');
+
+            const framesData = [];
+            for (const frame of currentAnimFrames) {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.drawImage(frame.img, 0, 0);
+                framesData.push(ctx.getImageData(0, 0, canvas.width, canvas.height));
+            }
+
+            const gif = await createGIF(canvas.width, canvas.height, framesData, 1000 / animPreviewFps);
+            const url = URL.createObjectURL(gif);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `animation_${currentAnimId}.gif`;
+            link.click();
+            URL.revokeObjectURL(url);
+        }
+
+        async function createGIF(width, height, frames, delay) {
+            const delayCs = Math.round(delay / 10);
+
+            function writeShort(value) {
+                return new Uint8Array([value & 0xFF, (value >> 8) & 0xFF]);
+            }
+
+            function quantize(imageData) {
+                const palette = [];
+                const pixels = [];
+                for (let i = 0; i < imageData.data.length; i += 4) {
+                    const r = imageData.data[i];
+                    const g = imageData.data[i + 1];
+                    const b = imageData.data[i + 2];
+                    const a = imageData.data[i + 3];
+                    if (a < 128) {
+                        pixels.push(0);
+                        continue;
+                    }
+                    const color = (r << 16) | (g << 8) | b;
+                    let index = palette.findIndex(c => c === color);
+                    if (index === -1) {
+                        if (palette.length < 255) {
+                            palette.push(color);
+                            index = palette.length;
+                        } else {
+                            let minDist = Infinity, minIdx = 0;
+                            palette.forEach((c, idx) => {
+                                const dr = r - ((c >> 16) & 0xFF);
+                                const dg = g - ((c >> 8) & 0xFF);
+                                const db = b - (c & 0xFF);
+                                const dist = dr * dr + dg * dg + db * db;
+                                if (dist < minDist) { minDist = dist; minIdx = idx; }
+                            });
+                            index = minIdx + 1;
+                        }
+                    } else { index = index + 1; }
+                    pixels.push(index);
+                }
+                return { palette, pixels };
+            }
+
+            function lzwEncode(pixels, minCodeSize) {
+                const clearCode = 1 << minCodeSize;
+                const eoiCode = clearCode + 1;
+                let codeSize = minCodeSize + 1;
+                let dict = new Map();
+                let code = clearCode + 2;
+                for (let i = 0; i < clearCode; i++) dict.set(String(i), i);
+                const output = [];
+                let current = '';
+                let bitBuffer = 0;
+                let bitCount = 0;
+                function writeCode(code) {
+                    bitBuffer |= code << bitCount;
+                    bitCount += codeSize;
+                    while (bitCount >= 8) {
+                        output.push(bitBuffer & 0xFF);
+                        bitBuffer >>= 8;
+                        bitCount -= 8;
+                    }
+                }
+                writeCode(clearCode);
+                for (const pixel of pixels) {
+                    const next = current + ',' + pixel;
+                    if (dict.has(next)) { current = next; }
+                    else {
+                        writeCode(dict.get(current));
+                        if (code < 4096) {
+                            dict.set(next, code++);
+                            if (code > (1 << codeSize) && codeSize < 12) codeSize++;
+                        }
+                        current = String(pixel);
+                    }
+                }
+                writeCode(dict.get(current));
+                writeCode(eoiCode);
+                if (bitCount > 0) output.push(bitBuffer & 0xFF);
+                return { data: output, minCodeSize };
+            }
+
+            const firstFrame = frames[0];
+            const { palette, pixels } = quantize(firstFrame);
+            const paletteSize = Math.max(2, Math.ceil(Math.log2(palette.length + 1)));
+            const actualPaletteSize = 1 << paletteSize;
+
+            const gifParts = [];
+            gifParts.push(new Uint8Array([0x47, 0x49, 0x46, 0x38, 0x39, 0x61]));
+            gifParts.push(writeShort(width));
+            gifParts.push(writeShort(height));
+            gifParts.push(new Uint8Array([0xF0 | (paletteSize - 1), 0, 0]));
+
+            const paletteBytes = new Uint8Array(actualPaletteSize * 3);
+            paletteBytes[0] = paletteBytes[1] = paletteBytes[2] = 0;
+            palette.forEach((color, i) => {
+                const idx = (i + 1) * 3;
+                paletteBytes[idx] = (color >> 16) & 0xFF;
+                paletteBytes[idx + 1] = (color >> 8) & 0xFF;
+                paletteBytes[idx + 2] = color & 0xFF;
+            });
+            gifParts.push(paletteBytes);
+            gifParts.push(new Uint8Array([0x21, 0xFF, 0x0B, 0x4E, 0x45, 0x54, 0x53, 0x43, 0x41, 0x50, 0x45, 0x32, 0x2E, 0x30, 0x03, 0x01, 0x00, 0x00, 0x00]));
+
+            for (let fi = 0; fi < frames.length; fi++) {
+                const { pixels: framePixels } = quantize(frames[fi]);
+                gifParts.push(new Uint8Array([0x21, 0xF9, 0x04, 0x09, delayCs & 0xFF, (delayCs >> 8) & 0xFF, 0x00, 0x00]));
+                gifParts.push(new Uint8Array([0x2C]));
+                gifParts.push(writeShort(0));
+                gifParts.push(writeShort(0));
+                gifParts.push(writeShort(width));
+                gifParts.push(writeShort(height));
+                gifParts.push(new Uint8Array([0]));
+
+                const { data: lzwData, minCodeSize } = lzwEncode(framePixels, paletteSize);
+                const subBlocks = [];
+                for (let i = 0; i < lzwData.length; i += 255) {
+                    const chunk = lzwData.slice(i, Math.min(i + 255, lzwData.length));
+                    subBlocks.push(chunk.length, ...chunk);
+                }
+                subBlocks.push(0);
+                gifParts.push(new Uint8Array([minCodeSize]));
+                gifParts.push(new Uint8Array(subBlocks));
+            }
+
+            gifParts.push(new Uint8Array([0x3B]));
+
+            const totalLength = gifParts.reduce((sum, part) => sum + part.length, 0);
+            const gifBytes = new Uint8Array(totalLength);
+            let offset = 0;
+            for (const part of gifParts) { gifBytes.set(part, offset); offset += part.length; }
+            return new Blob([gifBytes], { type: 'image/gif' });
+        }
+
+        loadFiles();
+        loadOutputPath();
+    </script>
+</body>
+</html>
