@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GameSprite Studio - 九宫格配置</title>
+    <style>
+        :root {
+            --bg-primary: #0f0f0f;
+            --bg-secondary: #1a1a1a;
+            --bg-tertiary: #242424;
+            --bg-hover: #2a2a2a;
+            --text-primary: #ffffff;
+            --text-secondary: #a0a0a0;
+            --text-muted: #666666;
+            --border-color: #333333;
+            --accent-blue: #3b82f6;
+            --accent-green: #22c55e;
+            --accent-orange: #f97316;
+            --accent-purple: #a855f7;
+            --radius-md: 8px;
+            --radius-lg: 12px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            height: 56px;
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            gap: 24px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 600;
+            font-size: 16px;
+        }
+
+        .logo-icon {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+        }
+
+        .nav-menu {
+            display: flex;
+            gap: 4px;
+        }
+
+        .nav-item {
+            padding: 8px 14px;
+            border-radius: var(--radius-md);
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+
+        .nav-item:hover {
+            background: var(--bg-hover);
+            color: var(--text-primary);
+        }
+
+        .nav-item.active {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+        }
+
+        .header-actions {
+            margin-left: auto;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            padding: 10px 16px;
+            border: none;
+            border-radius: var(--radius-md);
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-primary { background: var(--accent-blue); color: white; }
+        .btn-primary:hover { background: #2563eb; }
+        .btn-success { background: var(--accent-green); color: white; }
+        .btn-secondary {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+        }
+        .btn-secondary:hover { background: var(--bg-hover); }
+
+        .btn-icon {
+            width: 36px;
+            height: 36px;
+            padding: 0;
+            background: transparent;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-icon:hover {
+            background: var(--bg-hover);
+            color: var(--text-primary);
+        }
+
+        .main-content {
+            flex: 1;
+            display: flex;
+            overflow: hidden;
+        }
+
+        .sidebar {
+            width: 320px;
+            background: var(--bg-secondary);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar-header {
+            height: 48px;
+            padding: 0 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .sidebar-title {
+            font-size: 13px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-secondary);
+        }
+
+        .sidebar-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px;
+        }
+
+        .section { margin-bottom: 24px; }
+
+        .section-title {
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            margin-bottom: 12px;
+            letter-spacing: 0.5px;
+        }
+
+        .form-group { margin-bottom: 14px; }
+
+        .form-label {
+            display: block;
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-bottom: 6px;
+        }
+
+        .input {
+            width: 100%;
+            padding: 9px 12px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            color: var(--text-primary);
+            font-size: 14px;
+            outline: none;
+            transition: all 0.2s;
+        }
+
+        .input:focus {
+            border-color: var(--accent-blue);
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+        }
+
+        .input-sm {
+            padding: 6px 10px;
+            font-size: 13px;
+        }
+
+        .property-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .template-card {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 12px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .template-card:hover {
+            border-color: var(--accent-blue);
+        }
+
+        .template-card.selected {
+            border-color: var(--accent-blue);
+            background: rgba(59, 130, 246, 0.1);
+        }
+
+        .template-name {
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+
+        .template-desc {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .template-preview {
+            width: 100%;
+            height: 40px;
+            background: #0a0a0a;
+            border-radius: 4px;
+            margin-top: 8px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .workspace {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .canvas-area {
+            flex: 1;
+            display: flex;
+            padding: 24px;
+            gap: 24px;
+            overflow: auto;
+            background: 
+                linear-gradient(45deg, #1a1a1a 25%, transparent 25%),
+                linear-gradient(-45deg, #1a1a1a 25%, transparent 25%),
+                linear-gradient(45deg, transparent 75%, #1a1a1a 75%),
+                linear-gradient(-45deg, transparent 75%, #1a1a1a 75%);
+            background-size: 24px 24px;
+            background-position: 0 0, 0 12px, 12px -12px, -12px 0px;
+            background-color: var(--bg-primary);
+        }
+
+        .canvas-wrapper {
+            flex: 1;
+            background: var(--bg-secondary);
+            border-radius: var(--radius-lg);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .canvas-image {
+            max-width: 100%;
+            max-height: 100%;
+            display: block;
+        }
+
+        .guide-line {
+            position: absolute;
+            background: var(--accent-orange);
+            opacity: 0.8;
+            pointer-events: none;
+        }
+
+        .guide-line.vertical {
+            width: 2px;
+            cursor: ew-resize;
+        }
+
+        .guide-line.horizontal {
+            height: 2px;
+            cursor: ns-resize;
+        }
+
+        .preview-panel {
+            width: 320px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .panel {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 16px;
+        }
+
+        .panel-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 12px;
+        }
+
+        .stretch-preview {
+            background: var(--bg-tertiary);
+            border-radius: var(--radius-md);
+            padding: 16px;
+            margin-bottom: 12px;
+        }
+
+        .stretch-title {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+        }
+
+        .stretch-image {
+            width: 100%;
+            height: 120px;
+            background: #0a0a0a;
+            border-radius: 4px;
+            object-fit: contain;
+        }
+
+        .status-bar {
+            height: 32px;
+            background: var(--bg-secondary);
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            padding: 0 16px;
+            gap: 20px;
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .status-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .status-item .indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--accent-green);
+        }
+
+        .btn-large {
+            width: 100%;
+            padding: 12px;
+            font-size: 14px;
+        }
+
+        .upload-zone {
+            border: 2px dashed var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 32px 24px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .upload-zone:hover {
+            border-color: var(--accent-blue);
+            background: rgba(59, 130, 246, 0.1);
+        }
+
+        .upload-icon { font-size: 36px; margin-bottom: 8px; opacity: 0.6; }
+        .upload-text { font-size: 14px; color: var(--text-secondary); }
+
+        .file-input { display: none; }
+
+        .placeholder {
+            text-align: center;
+            color: var(--text-muted);
+            padding: 60px;
+        }
+
+        .placeholder-icon { font-size: 48px; margin-bottom: 12px; opacity: 0.4; }
+
+        .nine-grid {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            pointer-events: none;
+        }
+
+        .nine-cell {
+            position: absolute;
+            border: 1px dashed rgba(255, 255, 255, 0.2);
+            background: rgba(59, 130, 246, 0.05);
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="logo">
+            <div class="logo-icon">🎮</div>
+            <span>GameSprite Studio</span>
+        </div>
+        <nav class="nav-menu">
+            <a href="/" class="nav-item">AI切割</a>
+            <a href="/spritesheet" class="nav-item">精灵图</a>
+            <a href="/ninepatch" class="nav-item active">九宫格</a>
+            <a href="/export" class="nav-item">导出</a>
+        </nav>
+        <div class="header-actions">
+            <button class="btn-icon" title="打开项目">📂</button>
+            <button class="btn-icon" title="保存">💾</button>
+            <button class="btn btn-secondary">设置</button>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <span class="sidebar-title">九宫格配置</span>
+                <button class="btn-icon">?</button>
+            </div>
+            <div class="sidebar-content">
+                <div class="section">
+                    <div class="section-title">上传图片</div>
+                    <div class="upload-zone" id="uploadZone">
+                        <div class="upload-icon">📐</div>
+                        <div class="upload-text">点击或拖拽上传</div>
+                    </div>
+                    <input type="file" class="file-input" id="fileInput" accept="image/png,image/jpg">
+                </div>
+
+                <div class="section">
+                    <div class="section-title">边距设置</div>
+                    <div class="property-grid">
+                        <div class="form-group">
+                            <label class="form-label">左边距</label>
+                            <input type="number" class="input input-sm" id="marginLeft" value="20" min="0" oninput="updateGuides()">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">上边距</label>
+                            <input type="number" class="input input-sm" id="marginTop" value="20" min="0" oninput="updateGuides()">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">右边距</label>
+                            <input type="number" class="input input-sm" id="marginRight" value="20" min="0" oninput="updateGuides()">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">下边距</label>
+                            <input type="number" class="input input-sm" id="marginBottom" value="20" min="0" oninput="updateGuides()">
+                        </div>
+                    </div>
+                    <button class="btn btn-secondary" style="width: 100%; margin-top: 8px;" onclick="syncMargins()">🔄 同步边距</button>
+                </div>
+
+                <div class="section">
+                    <div class="section-title">预设模板</div>
+                    <div class="template-card" onclick="applyTemplate('narrow')">
+                        <div class="template-name">窄边框</div>
+                        <div class="template-desc">适用于细线边框</div>
+                        <div class="template-preview" style="background: linear-gradient(90deg, #3b82f6 10px, transparent 10px);"></div>
+                    </div>
+                    <div class="template-card" onclick="applyTemplate('wide')">
+                        <div class="template-name">宽边框</div>
+                        <div class="template-desc">适用于粗边框按钮</div>
+                        <div class="template-preview" style="background: linear-gradient(90deg, #3b82f6 30px, transparent 30px);"></div>
+                    </div>
+                    <div class="template-card" onclick="applyTemplate('symmetric')">
+                        <div class="template-name">对称布局</div>
+                        <div class="template-desc">四角对称，居中拉伸</div>
+                        <div class="template-preview" style="background: linear-gradient(90deg, #3b82f6 20px, #a855f7 20px, transparent 40px);"></div>
+                    </div>
+                </div>
+
+                <div class="section" style="margin-top: auto;">
+                    <button class="btn btn-primary btn-large" onclick="exportNinePatch()">
+                        📤 导出九宫格
+                    </button>
+                    <button class="btn btn-secondary btn-large" style="margin-top: 8px;" onclick="copyConfig()">
+                        📋 复制配置
+                    </button>
+                </div>
+            </div>
+        </aside>
+
+        <section class="workspace">
+            <div class="canvas-area">
+                <div class="canvas-wrapper" id="canvasWrapper">
+                    <img class="canvas-image" id="mainImage" style="display: none;">
+                    <div class="nine-grid" id="nineGrid"></div>
+                    <div class="placeholder" id="placeholder">
+                        <div class="placeholder-icon">📐</div>
+                        <div>上传图片配置九宫格</div>
+                    </div>
+                </div>
+                <div class="preview-panel">
+                    <div class="panel">
+                        <div class="panel-title">📊 原始尺寸</div>
+                        <div style="font-size: 24px; font-weight: 600; color: var(--accent-blue);" id="originalSize">0 × 0</div>
+                        <div style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">原始图片尺寸</div>
+                    </div>
+                    <div class="panel">
+                        <div class="panel-title">🔍 拉伸预览</div>
+                        <div class="stretch-preview">
+                            <div class="stretch-title">2x 拉伸</div>
+                            <img id="stretch2x" class="stretch-image" style="display: none;">
+                            <div style="display: flex; justify-content: center; align-items: center; height: 120px; color: var(--text-muted);" id="stretch2xPlaceholder">等待上传...</div>
+                        </div>
+                        <div class="stretch-preview">
+                            <div class="stretch-title">4x 拉伸</div>
+                            <img id="stretch4x" class="stretch-image" style="display: none;">
+                            <div style="display: flex; justify-content: center; align-items: center; height: 120px; color: var(--text-muted);" id="stretch4xPlaceholder">等待上传...</div>
+                        </div>
+                    </div>
+                    <div class="panel">
+                        <div class="panel-title">📄 配置数据</div>
+                        <div style="font-family: monospace; font-size: 12px; color: var(--text-secondary); white-space: pre;" id="configData">{
+  "left": 20,
+  "top": 20,
+  "right": 20,
+  "bottom": 20
+}</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="status-bar">
+        <div class="status-item">
+            <span class="indicator" id="statusIndicator"></span>
+            <span id="statusText">就绪</span>
+        </div>
+        <div class="status-item">
+            <span>边距: </span>
+            <span id="marginDisplay">L:20 T:20 R:20 B:20</span>
+        </div>
+        <div style="margin-left: auto;">九宫格配置器</div>
+    </footer>
+
+    <script>
+        let currentImage = null;
+
+        document.getElementById('uploadZone').addEventListener('click', () => {
+            document.getElementById('fileInput').click();
+        });
+
+        document.getElementById('uploadZone').addEventListener('drop', (e) => {
+            e.preventDefault();
+            if (e.dataTransfer.files.length > 0) handleFile(e.dataTransfer.files[0]);
+        });
+
+        document.getElementById('fileInput').addEventListener('change', (e) => {
+            if (e.target.files.length > 0) handleFile(e.target.files[0]);
+        });
+
+        async function handleFile(file) {
+            setStatus('上传中...', 'warning');
+            const formData = new FormData();
+            formData.append('file', file);
+
+            const response = await fetch('/upload', { method: 'POST', body: formData });
+            if (response.ok) {
+                currentImage = await response.json();
+                document.getElementById('mainImage').src = `/preview/${currentImage.filename}`;
+                document.getElementById('mainImage').style.display = 'block';
+                document.getElementById('placeholder').style.display = 'none';
+                document.getElementById('originalSize').textContent = `${currentImage.width} × ${currentImage.height}`;
+                
+                document.getElementById('stretch2x').src = `/preview/${currentImage.filename}`;
+                document.getElementById('stretch2x').style.display = 'block';
+                document.getElementById('stretch2xPlaceholder').style.display = 'none';
+                document.getElementById('stretch4x').src = `/preview/${currentImage.filename}`;
+                document.getElementById('stretch4x').style.display = 'block';
+                document.getElementById('stretch4xPlaceholder').style.display = 'none';
+
+                updateGuides();
+                setStatus('上传成功', 'success');
+            }
+        }
+
+        function updateGuides() {
+            if (!currentImage) return;
+            
+            const left = parseInt(document.getElementById('marginLeft').value);
+            const top = parseInt(document.getElementById('marginTop').value);
+            const right = parseInt(document.getElementById('marginRight').value);
+            const bottom = parseInt(document.getElementById('marginBottom').value);
+
+            document.getElementById('marginDisplay').textContent = `L:${left} T:${top} R:${right} B:${bottom}`;
+            document.getElementById('configData').textContent = JSON.stringify({ left, top, right, bottom }, null, 2);
+
+            const img = document.getElementById('mainImage');
+            if (!img.complete) return;
+
+            const scaleX = img.offsetWidth / img.naturalWidth;
+            const scaleY = img.offsetHeight / img.naturalHeight;
+
+            const grid = document.getElementById('nineGrid');
+            grid.innerHTML = `
+                <div class="guide-line vertical" style="left: ${left * scaleX}px; top: 0; height: 100%;"></div>
+                <div class="guide-line vertical" style="right: ${right * scaleX}px; top: 0; height: 100%;"></div>
+                <div class="guide-line horizontal" style="top: ${top * scaleY}px; left: 0; width: 100%;"></div>
+                <div class="guide-line horizontal" style="bottom: ${bottom * scaleY}px; left: 0; width: 100%;"></div>
+            `;
+
+            fetch('/update-ninepatch', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ left, top, right, bottom })
+            });
+        }
+
+        function syncMargins() {
+            const value = document.getElementById('marginLeft').value;
+            document.getElementById('marginTop').value = value;
+            document.getElementById('marginRight').value = value;
+            document.getElementById('marginBottom').value = value;
+            updateGuides();
+        }
+
+        function applyTemplate(type) {
+            if (type === 'narrow') {
+                document.getElementById('marginLeft').value = 4;
+                document.getElementById('marginTop').value = 4;
+                document.getElementById('marginRight').value = 4;
+                document.getElementById('marginBottom').value = 4;
+            } else if (type === 'wide') {
+                document.getElementById('marginLeft').value = 32;
+                document.getElementById('marginTop').value = 32;
+                document.getElementById('marginRight').value = 32;
+                document.getElementById('marginBottom').value = 32;
+            } else if (type === 'symmetric') {
+                document.getElementById('marginLeft').value = 24;
+                document.getElementById('marginTop').value = 24;
+                document.getElementById('marginRight').value = 24;
+                document.getElementById('marginBottom').value = 24;
+            }
+            updateGuides();
+        }
+
+        function exportNinePatch() {
+            if (!currentImage) {
+                alert('请先上传图片');
+                return;
+            }
+            setStatus('导出中...', 'warning');
+            
+            const config = {
+                left: parseInt(document.getElementById('marginLeft').value),
+                top: parseInt(document.getElementById('marginTop').value),
+                right: parseInt(document.getElementById('marginRight').value),
+                bottom: parseInt(document.getElementById('marginBottom').value),
+                source: currentImage.filename,
+                width: currentImage.width,
+                height: currentImage.height
+            };
+            
+            const blob = new Blob([JSON.stringify(config, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'ninepatch.json';
+            a.click();
+            
+            setStatus('导出成功', 'success');
+        }
+
+        function copyConfig() {
+            const config = {
+                left: parseInt(document.getElementById('marginLeft').value),
+                top: parseInt(document.getElementById('marginTop').value),
+                right: parseInt(document.getElementById('marginRight').value),
+                bottom: parseInt(document.getElementById('marginBottom').value)
+            };
+            navigator.clipboard.writeText(JSON.stringify(config, null, 2));
+            setStatus('配置已复制', 'success');
+        }
+
+        function setStatus(text, type = 'success') {
+            document.getElementById('statusText').textContent = text;
+            const indicator = document.getElementById('statusIndicator');
+            indicator.className = 'indicator' + (type === 'error' ? ' error' : type === 'warning' ? ' warning' : '');
+        }
+    </script>
+</body>
+</html>
